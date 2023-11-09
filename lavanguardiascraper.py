@@ -28,13 +28,22 @@ def crearSopa(html):
     return soup
 
 
-
+###################################### NEW WAY (more general) ################################
+# This suplanta crear Textos /imagenes /videos por separado
 def articleModules(soup):
     article = soup.find('div', class_='article-modules')
     return article
 
 def extractArticle(article):
-    tag_attr_pairs = [('p', {'class': 'paragraph'}), ('img', None), ('h2', {'class': 'epigraph'})]
+    extracted_elements = []
+    for element in article.find_all():
+    if element.name in ['p', 'img', 'h3']:
+        selected_tags.append(element)
+
+# Print the selected tags in the order they appear
+for tag in selected_tags:
+    print(tag)
+    """tag_attr_pairs = [('p', {'class': 'paragraph'}), ('img', None), ('h2', {'class': 'epigraph'})]
     for tag, attrs in tag_attr_pairs:
         # Find the elements based on the tag and attributes
         if attrs:
@@ -44,11 +53,14 @@ def extractArticle(article):
 
         # Add the found elements to the extracted list
         extracted_elements.extend(elements)
+    for i in range(len(extracted_elements)):
+        if extracted_elements[i].name == 'img':
+            img_link = extracted_elements[i].get('data-full-src')
+            extracted_elements[i] = f"![Image|100]({img_link})"
+    for element in extracted_elements:
+        print(element)"""
 
-# Now 'extracted_elements' contains the elements in the specified order
-for element in extracted_elements:
-    print(element)
-
+##############################################################################################
 
 # Titulos de noticia
 def crearTextos(soup):
@@ -108,22 +120,27 @@ def escribirNoticia(noticia):
     return
 
 # Noticia Normal
-def noticiaNormal():
+def noticiaNormal(url):
     html = httpGet(url)
     soup = crearSopa(html)
     contents = list(crearTextos(soup))
     contents.insert(2, crearImagenes(soup))
     noticia = crearNoticia(contents[0],contents[1],contents[3],contents[2])
     escribirNoticia(noticia)
-    return
+    return noticia
 
 # Noticia Video
-def noticiaVideo(html):
-    return
+def noticiaVideo(url):
+    return 
 
 # Noticia Opinion
-def noticiaOpinion(html):
-    return
+def noticiaOpinion(url):
+    return 
 
 
-noticiaNormal()
+
+html = httpGet(url)
+soup = crearSopa(html)
+article = articleModules(soup)
+extracted = extractArticle(article)
+
