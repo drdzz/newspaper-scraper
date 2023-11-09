@@ -14,7 +14,7 @@ import json
 # Falta lo de procesar los textos por algun tipo de IA
 
 # Arguments
-url = "https://www.lavanguardia.com/politica/20231109/9365783/feijoo-considera-independentismo-sale-reforzado-retomar-pulso.html"
+url = "https://www.lavanguardia.com/politica/20231109/9365549/tirotean-alejo-vidal-quadras-plena-calle-madrid.html"
 
 # GET Request
 def httpGet(url):
@@ -42,11 +42,11 @@ def extractArticle(article):
     titulo = soup.find('h1')
     titulo = "## " + titulo.text
     subtitulo = soup.find('h2', class_='epigraph')  # subtituloslista : mira aqui por si hay mas de un subtit debajo el titulo
-    subtitulo = f"**{subtitulo.text}**" 
+    subtitulo = f"- **{subtitulo.text}**\n" 
     article = soup.find('div', class_='article-modules')
     foto_portada = soup.find('img')
    # foto_portada = 
-    print(foto_portada.get('data-full-src'))  # Falta que haga sfoto portada
+    #print(foto_portada.get('data-full-src'))  # Falta que haga sfoto portada
     extracted_elements = []
     for element in article.find_all():
         if element.name in ['p', 'img', 'h3']:
@@ -58,12 +58,12 @@ def extractArticle(article):
         elif extracted_elements[i].name == 'p':
             extracted_elements[i] = f"{extracted_elements[i].text}\n\n"
         elif extracted_elements[i].name == 'h3':
-            extracted_elements[i] = f"-----------\n ###### {extracted_elements[i].text}**\n-----------------" #esto no chuta
+            extracted_elements[i] = f"-----------\n ###### **{extracted_elements[i].text}"+"**\n-----------------\n\n" #esto no chuta
    
     elements = []
-    for element in extracted_elements:
-        if isinstance(element,str):
-            elements.append(element)
+    for i in range(len(extracted_elements)):
+        if isinstance(extracted_elements[i],str):
+            elements.append(extracted_elements[i])        
 
     return titulo, subtitulo, elements
     
@@ -107,5 +107,6 @@ def noticiaOpinion(url):
 html = httpGet(url)
 soup = crearSopa(html)
 article = extractArticle(soup)
+print(article)
 noticia = crearNoticia(article[0],article[1],article[2])
 escribirNoticia(noticia)
