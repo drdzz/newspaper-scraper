@@ -14,7 +14,7 @@ import json
 # Falta lo de procesar los textos por algun tipo de IA
 
 # Arguments
-url = "https://www.lavanguardia.com/politica/20231108/9363668/psoe-junts-sacuden-presion-calendario-encauzar-acuerdo.html"
+url = "https://www.lavanguardia.com/politica/20231109/9365783/feijoo-considera-independentismo-sale-reforzado-retomar-pulso.html"
 
 # GET Request
 def httpGet(url):
@@ -42,8 +42,11 @@ def extractArticle(article):
     titulo = soup.find('h1')
     titulo = "## " + titulo.text
     subtitulo = soup.find('h2', class_='epigraph')  # subtituloslista : mira aqui por si hay mas de un subtit debajo el titulo
-    subtitulo = "- " + f"**{subtitulo.text}**" + "\n"
+    subtitulo = f"**{subtitulo.text}**" 
     article = soup.find('div', class_='article-modules')
+    foto_portada = soup.find('img')
+   # foto_portada = 
+    print(foto_portada.get('data-full-src'))  # Falta que haga sfoto portada
     extracted_elements = []
     for element in article.find_all():
         if element.name in ['p', 'img', 'h3']:
@@ -55,48 +58,16 @@ def extractArticle(article):
         elif extracted_elements[i].name == 'p':
             extracted_elements[i] = f"{extracted_elements[i].text}\n\n"
         elif extracted_elements[i].name == 'h3':
-            extracted_elements[i] = f"###### {extracted_elements[i].text}\n"
-    return extracted_elements
+            extracted_elements[i] = f"-----------\n ###### {extracted_elements[i].text}**\n-----------------" #esto no chuta
+   
+    elements = []
+    for element in extracted_elements:
+        if isinstance(element,str):
+            elements.append(element)
+
+    return titulo, subtitulo, elements
     
 ##############################################################################################
-"""
-# Titulos de noticia
- def crearTextos(soup):
-    titulo = soup.find('h1')
-    titulo = "## " + titulo.text
-    subtitulo = soup.find('h2', class_='epigraph')  # subtituloslista : mira aqui por si hay mas de un subtit debajo el titulo
-    subtitulo = "- " + f"**{subtitulo.text}**" + "\n"
-
-    texts = soup.findAll('p', class_='paragraph')
-    subtitles = soup.find_all('h3', class_='subtitle')
-    count = 0
-    for subtitle in subtitles:
-        subtitle = f"##### {subtitle.text}"
-        texts.insert(0, "---------\n")
-        texts.insert(1, subtitle + "\n")
-        count = count + 1 
-    texts.insert(count * 2,"-------\n")
-    #texts = [str(text) for text in texts]
-    for i in range(len(texts)):
-        if isinstance(texts[i],str):
-            continue
-        else:
-            texts[i] = texts[i].text + "\n\n"
-    return titulo, subtitulo, texts
-
-# Imagenes de noticia
-def crearImagenes(soup):
-    #Exctract and add image links
-    image_links = []
-    for img in soup.find_all('img'):
-        src = img.get('src')
-        if src and "www.lavanguardia.com" in src:
-            image_links.append(f"![Image|700]({src})")
-            subpicture = soup.find('p', class_='caption-title') #text under photo
-    if subpicture:
-        image_links[-1] += f"\n*{subpicture.text[:-1]}*\n\n"
-    return image_links
-"""
 
 # Lista de Noticia
 #def crearNoticia(titulo,subtitulo,texts,image_links): # Se cambia por extracted_elements
@@ -120,13 +91,7 @@ def escribirNoticia(noticia):
 
 # Noticia Normal
 def noticiaNormal(url):
-    html = httpGet(url)
-    soup = crearSopa(html)
-    article = extractArticle(article)
-    contents = list(crearTextos(soup))
-    contents.insert(2, crearImagenes(soup))
-    noticia = crearNoticia(contents[0],contents[1],contents[3],contents[2])
-    escribirNoticia(noticia)
+
     return noticia
 
 # Noticia Video
@@ -142,6 +107,5 @@ def noticiaOpinion(url):
 html = httpGet(url)
 soup = crearSopa(html)
 article = extractArticle(soup)
-for line in article:
-    print(line)
-escribirNoticia(article)
+noticia = crearNoticia(article[0],article[1],article[2])
+escribirNoticia(noticia)
