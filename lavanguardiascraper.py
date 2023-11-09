@@ -30,53 +30,38 @@ def crearSopa(html):
 
 ###################################### NEW WAY (more general) ################################
 # This suplanta crear Textos /imagenes /videos por separado
-def articleModules(soup):
+"""def articleModules(soup):
+    titulo = soup.find('h1')
+    titulo = "## " + titulo.text
+    subtitulo = soup.find('h2', class_='epigraph')  # subtituloslista : mira aqui por si hay mas de un subtit debajo el titulo
+    subtitulo = "- " + f"**{subtitulo.text}**" + "\n"
     article = soup.find('div', class_='article-modules')
-    return article
+    return titulo, subtitulo, article"""
 
 def extractArticle(article):
+    titulo = soup.find('h1')
+    titulo = "## " + titulo.text
+    subtitulo = soup.find('h2', class_='epigraph')  # subtituloslista : mira aqui por si hay mas de un subtit debajo el titulo
+    subtitulo = "- " + f"**{subtitulo.text}**" + "\n"
+    article = soup.find('div', class_='article-modules')
     extracted_elements = []
     for element in article.find_all():
         if element.name in ['p', 'img', 'h3']:
             extracted_elements.append(element)
-
     for i in range(len(extracted_elements)):
-        if extracted_elements[i].name == 'img' and extracted_elements[i].has_attr('class') and ('lazy' in extracted_elements[i]['class']):  # solo las que tienen class = "nolazy"
-            print(extracted_elements[i].get("class"))
+        if extracted_elements[i].name == 'img' and extracted_elements[i].has_attr('alt') and ("Horizontal" in extracted_elements[i]['alt']):  # solo las que tienen class = "nolazy"
             img_link = extracted_elements[i].get('data-full-src')
-            extracted_elements[i] = f"![Image|100]({img_link})"
-            #print(extracted_elements[i])
+            extracted_elements[i] = f"![Image|100]({img_link})\n"
         elif extracted_elements[i].name == 'p':
-            print("text")
-            extracted_elements[i] = extracted_elements[i].text
-        elif extracted_elements[i] == 'h3':
-            print("grande")
-    """for element in extracted_elements:
-        print(element)"""
-
+            extracted_elements[i] = f"{extracted_elements[i].text}\n\n"
+        elif extracted_elements[i].name == 'h3':
+            extracted_elements[i] = f"###### {extracted_elements[i].text}\n"
+    return extracted_elements
     
-    """
-        tag_attr_pairs = [('p', {'class': 'paragraph'}), ('img', None), ('h2', {'class': 'epigraph'})]
-        for tag, attrs in tag_attr_pairs:
-        # Find the elements based on the tag and attributes
-        if attrs:
-            elements = extracted_elements.find_all(tag, attrs=attrs)
-        else:
-            elements = extracted.find_all(tag)
-
-        # Add the found elements to the extracted list
-        extracted_elements.extend(elements)
-    for i in range(len(extracted_elements)):
-        if extracted_elements[i].name == 'img':
-            img_link = extracted_elements[i].get('data-full-src')
-            extracted_elements[i] = f"![Image|100]({img_link})"
-    for element in extracted_elements:
-        print(element)"""
-
 ##############################################################################################
-
+"""
 # Titulos de noticia
-def crearTextos(soup):
+ def crearTextos(soup):
     titulo = soup.find('h1')
     titulo = "## " + titulo.text
     subtitulo = soup.find('h2', class_='epigraph')  # subtituloslista : mira aqui por si hay mas de un subtit debajo el titulo
@@ -111,22 +96,23 @@ def crearImagenes(soup):
     if subpicture:
         image_links[-1] += f"\n*{subpicture.text[:-1]}*\n\n"
     return image_links
+"""
 
 # Lista de Noticia
-def crearNoticia(titulo,subtitulo,texts,image_links):
+#def crearNoticia(titulo,subtitulo,texts,image_links): # Se cambia por extracted_elements
+def crearNoticia(titulo,subtitulo,extracted_elements):
     noticia = []
     noticia.append(titulo)
     noticia.append("\n---------------\n")
     noticia.append(subtitulo)
     noticia.append("---------------\n")
-    noticia.extend(image_links)
-    for data in texts:
+    for data in extracted_elements:
         noticia.append(data)
     return noticia
 
 # Escribe noticia
 def escribirNoticia(noticia):
-    with open('C:\\Users\\drdzz\\Desktop\\Obsidian Vault\\noticia.md','w',encoding='utf-8') as file:
+    with open('C:\\Users\\marc.ponce\\Documents\\Obsidian Vault\\noticia.md','w',encoding='utf-8') as file:
         for linea in noticia:
             #print("??",linea) #optional
             file.write(linea)
@@ -136,6 +122,7 @@ def escribirNoticia(noticia):
 def noticiaNormal(url):
     html = httpGet(url)
     soup = crearSopa(html)
+    article = extractArticle(article)
     contents = list(crearTextos(soup))
     contents.insert(2, crearImagenes(soup))
     noticia = crearNoticia(contents[0],contents[1],contents[3],contents[2])
@@ -154,6 +141,7 @@ def noticiaOpinion(url):
 
 html = httpGet(url)
 soup = crearSopa(html)
-article = articleModules(soup)
-extracted = extractArticle(article)
-
+article = extractArticle(soup)
+for line in article:
+    print(line)
+escribirNoticia(article)
