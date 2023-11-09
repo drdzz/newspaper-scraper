@@ -37,19 +37,32 @@ def articleModules(soup):
 def extractArticle(article):
     extracted_elements = []
     for element in article.find_all():
-    if element.name in ['p', 'img', 'h3']:
-        selected_tags.append(element)
+        if element.name in ['p', 'img', 'h3']:
+            extracted_elements.append(element)
 
-# Print the selected tags in the order they appear
-for tag in selected_tags:
-    print(tag)
-    """tag_attr_pairs = [('p', {'class': 'paragraph'}), ('img', None), ('h2', {'class': 'epigraph'})]
-    for tag, attrs in tag_attr_pairs:
+    for i in range(len(extracted_elements)):
+        if extracted_elements[i].name == 'img' and extracted_elements[i].has_attr('class') and ('lazy' in extracted_elements[i]['class']):  # solo las que tienen class = "nolazy"
+            print(extracted_elements[i].get("class"))
+            img_link = extracted_elements[i].get('data-full-src')
+            extracted_elements[i] = f"![Image|100]({img_link})"
+            #print(extracted_elements[i])
+        elif extracted_elements[i].name == 'p':
+            print("text")
+            extracted_elements[i] = extracted_elements[i].text
+        elif extracted_elements[i] == 'h3':
+            print("grande")
+    """for element in extracted_elements:
+        print(element)"""
+
+    
+    """
+        tag_attr_pairs = [('p', {'class': 'paragraph'}), ('img', None), ('h2', {'class': 'epigraph'})]
+        for tag, attrs in tag_attr_pairs:
         # Find the elements based on the tag and attributes
         if attrs:
-            elements = article.find_all(tag, attrs=attrs)
+            elements = extracted_elements.find_all(tag, attrs=attrs)
         else:
-            elements = article.find_all(tag)
+            elements = extracted.find_all(tag)
 
         # Add the found elements to the extracted list
         extracted_elements.extend(elements)
