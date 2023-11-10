@@ -14,8 +14,7 @@ import json
 # Falta lo de procesar los textos por algun tipo de IA
 
 # Arguments
-url = "https://www.lavanguardia.com/politica/20231109/9365549/tirotean-alejo-vidal-quadras-plena-calle-madrid.html"
-
+url = "https://www.lavanguardia.com/internacional/20231110/9366707/guerra-despiadada-israel-hamas-envenena-politica-britanica.html"
 # GET Request
 def httpGet(url):
     resp = requests.get(url)
@@ -44,9 +43,9 @@ def extractArticle(article):
     subtitulo = soup.find('h2', class_='epigraph')  # subtituloslista : mira aqui por si hay mas de un subtit debajo el titulo
     subtitulo = f"- **{subtitulo.text}**\n" 
     article = soup.find('div', class_='article-modules')
-    foto_portada = soup.find('img')
-   # foto_portada = 
-    #print(foto_portada.get('data-full-src'))  # Falta que haga sfoto portada
+    foto = soup.find('img', {'data-full-src': lambda x: x and 'lavanguardia' in x})
+    foto_portada = f"![Image]({foto.get('data-full-src')})\n"
+    foto_pie =  f"*{foto.get('alt')}*\n"
     extracted_elements = []
     for element in article.find_all():
         if element.name in ['p', 'img', 'h3']:
@@ -65,18 +64,21 @@ def extractArticle(article):
         if isinstance(extracted_elements[i],str):
             elements.append(extracted_elements[i])        
 
-    return titulo, subtitulo, elements
+    return titulo, foto_portada, foto_pie, subtitulo, elements
     
 ##############################################################################################
 
 # Lista de Noticia
 #def crearNoticia(titulo,subtitulo,texts,image_links): # Se cambia por extracted_elements
-def crearNoticia(titulo,subtitulo,extracted_elements):
+def crearNoticia(titulo,foto_portada,foto_pie,subtitulo,extracted_elements):
     noticia = []
     noticia.append(titulo)
     noticia.append("\n---------------\n")
     noticia.append(subtitulo)
     noticia.append("---------------\n")
+    noticia.append(foto_portada)
+    noticia.append(foto_pie+"\n\n\n")
+    #noticia.append("---------------\n")
     for data in extracted_elements:
         noticia.append(data)
     return noticia
@@ -107,6 +109,6 @@ def noticiaOpinion(url):
 html = httpGet(url)
 soup = crearSopa(html)
 article = extractArticle(soup)
-print(article)
-noticia = crearNoticia(article[0],article[1],article[2])
+#print(article)
+noticia = crearNoticia(article[0],article[1],article[2],article[3],article[4])
 escribirNoticia(noticia)
