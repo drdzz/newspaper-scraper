@@ -14,7 +14,8 @@ import json
 # Falta lo de procesar los textos por algun tipo de IA
 
 # Arguments
-url = "https://www.lavanguardia.com/internacional/20231110/9366707/guerra-despiadada-israel-hamas-envenena-politica-britanica.html"
+url = "https://www.lavanguardia.com/local/barcelona/20231110/9366426/35-locales-barcelona-compro-2021-abrir-tiendas-aun-cerrados.html"
+
 # GET Request
 def httpGet(url):
     resp = requests.get(url)
