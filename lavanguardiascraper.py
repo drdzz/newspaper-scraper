@@ -14,7 +14,7 @@ import json
 
 
 # Arguments
-url = "https://www.lavanguardia.com/politica/20231111/9369432/sanchez-alcanza-mayoria-absoluta-transversal-avalar-reeleccion.html"
+url = "https://www.lavanguardia.com/economia/20231113/9372534/foment-propondra-junts-programa-economico-nueva-legislatura.html"
 
 # GET Request
 def httpGet(url):
@@ -31,13 +31,16 @@ def crearSopa(html):
 def articleModules(soup):
     titulo = soup.find('h1')
     titulo = "## " + titulo.text
-    subtitulo = soup.find('h2', class_='epigraph')  # subtituloslista : mira aqui por si hay mas de un subtit debajo el titulo
-    subtitulo = f"- **{subtitulo.text}**\n" 
+    subtitulos = soup.find_all('h2', class_='epigraph')  # subtituloslista : mira aqui por si hay mas de un subtit debajo el titulo
+    subs = []
+    for sub in subtitulos:
+        subs.append(sub.text)
+    #subtitulo = f"- **{subtitulo.text}**\n" # este es para un solo sub (arriba es find no find_all)
     article = soup.find('div', class_='article-modules')
     foto = soup.find('img', {'data-full-src': lambda x: x and 'lavanguardia' in x})
     foto_portada = f"![Image]({foto.get('data-full-src')})\n"
     foto_pie =  f"*{foto.get('alt')}*\n"
-    return titulo, subtitulo, foto_portada, foto_pie, article
+    return titulo, subs, foto_portada, foto_pie, article
 
 #
 def extractArticle(article):
@@ -62,12 +65,13 @@ def extractArticle(article):
     return elements
     
 # Lista de Noticia
-def crearNoticia(titulo,subtitulo,foto_portada,foto_pie,extracted_elements):
+def crearNoticia(titulo,subtitulos,foto_portada,foto_pie,extracted_elements):
     noticia = []
     noticia.append(titulo)
     noticia.append("\n---------------\n")
-    noticia.append(subtitulo)
-    noticia.append("---------------\n")
+    for subtitulo in subtitulos:
+        noticia.append(f"- **{subtitulo}**\n")
+    noticia.append("---------------\n")    
     noticia.append(foto_portada)
     noticia.append(foto_pie+"\n\n\n")
     for data in extracted_elements:
@@ -103,3 +107,4 @@ def noticiaOpinion(url):
 
 
 
+noticiaNormal(url)
