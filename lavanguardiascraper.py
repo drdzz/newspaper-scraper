@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 import json
 
 # TODO
-# subtituloslista
 # Poner mas tipos de noticias solo soporta una, no hay videos ni noticias en directo.
 # Poner que scarpee todas las noticias y escoja las que mas me gusten
 #     una vez eso funcione poner que salgan todas a la vez en la seccion de noticias de obsidiam, mouseover...etc
@@ -14,7 +13,7 @@ import json
 
 
 # Arguments
-url = "https://www.lavanguardia.com/economia/20231113/9372534/foment-propondra-junts-programa-economico-nueva-legislatura.html"
+url = "https://www.lavanguardia.com/politica/20231113/9372427/darle-vuelta-jamon.html"
 
 # GET Request
 def httpGet(url):
@@ -31,11 +30,10 @@ def crearSopa(html):
 def articleModules(soup):
     titulo = soup.find('h1')
     titulo = "## " + titulo.text
-    subtitulos = soup.find_all('h2', class_='epigraph')  # subtituloslista : mira aqui por si hay mas de un subtit debajo el titulo
+    subtitulos = soup.find_all('h2', class_='epigraph') 
     subs = []
     for sub in subtitulos:
         subs.append(sub.text)
-    #subtitulo = f"- **{subtitulo.text}**\n" # este es para un solo sub (arriba es find no find_all)
     article = soup.find('div', class_='article-modules')
     foto = soup.find('img', {'data-full-src': lambda x: x and 'lavanguardia' in x})
     foto_portada = f"![Image]({foto.get('data-full-src')})\n"
@@ -98,13 +96,13 @@ def noticiaNormal(url):
 
 # Noticia Video
 def noticiaVideo(url):
+    html = httpGet(url)
+    soup = crearSopa
+
     return 
 
 # Noticia Opinion
 def noticiaOpinion(url):
     return 
-
-
-
 
 noticiaNormal(url)
