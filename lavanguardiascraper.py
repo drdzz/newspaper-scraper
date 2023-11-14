@@ -13,7 +13,7 @@ import json
 
 
 # Arguments
-url = "https://www.lavanguardia.com/politica/20231113/9372427/darle-vuelta-jamon.html"
+url = "https://www.lavanguardia.com/politica/20231113/9374947/claves-amnistia-seis-preguntas-clave.html"
 
 # GET Request
 def httpGet(url):
@@ -44,16 +44,18 @@ def articleModules(soup):
 def extractArticle(article):
     extracted_elements = []
     for element in article.find_all():
-        if element.name in ['p', 'img', 'h3']:
+        if element.name in ['p', 'img', 'h3', 'h2']:
             extracted_elements.append(element)
     for i in range(len(extracted_elements)):
         if extracted_elements[i].name == 'img' and extracted_elements[i].has_attr('alt') and ("Horizontal" in extracted_elements[i]['alt']):  # solo las que tienen class = "nolazy"
-            img_link = extracted_elements[i].get('data-full-src')
-            extracted_elements[i] = f"![Image|100]({img_link})\n"
+            for parent in p_tag.parents:
+                if parent.has_attr("id"):
+                    img_link = extracted_elements[i].get('data-full-src')
+                    extracted_elements[i] = f"![Image|100]({img_link})\n" #Testingt this to fukter out related content
         elif extracted_elements[i].name == 'p':
             extracted_elements[i] = f"{extracted_elements[i].text}\n\n"
-        elif extracted_elements[i].name == 'h3':
-            extracted_elements[i] = f"-----------\n ###### **{extracted_elements[i].text}"+"**\n-----------------\n\n" #esto no chuta
+        elif extracted_elements[i].name == 'h3' or 'h2':
+            extracted_elements[i] = f"-----------\n ###### **{extracted_elements[i].text}"+"**\n-----------------\n\n"
    
     elements = []
     for i in range(len(extracted_elements)):
@@ -104,5 +106,6 @@ def noticiaVideo(url):
 # Noticia Opinion
 def noticiaOpinion(url):
     return 
+ 
 
 noticiaNormal(url)
