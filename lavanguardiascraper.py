@@ -47,15 +47,14 @@ def extractArticle(article):
         if element.name in ['p', 'img', 'h3', 'h2']:
             extracted_elements.append(element)
     for i in range(len(extracted_elements)):
-        if extracted_elements[i].name == 'img' and extracted_elements[i].has_attr('alt') and ("Horizontal" in extracted_elements[i]['alt']):  # solo las que tienen class = "nolazy"
-            for parent in p_tag.parents:
-                if parent.has_attr("id"):
-                    img_link = extracted_elements[i].get('data-full-src')
-                    extracted_elements[i] = f"![Image|100]({img_link})\n" #Testingt this to fukter out related content
-        elif extracted_elements[i].name == 'p':
-            extracted_elements[i] = f"{extracted_elements[i].text}\n\n"
-        elif extracted_elements[i].name == 'h3' or 'h2':
-            extracted_elements[i] = f"-----------\n ###### **{extracted_elements[i].text}"+"**\n-----------------\n\n"
+        if not extracted_elements[i].find_parent('span', class_='content-related content-border related-double'):
+            if extracted_elements[i].name == 'img' and extracted_elements[i].has_attr('alt') and ("Horizontal" in extracted_elements[i]['alt']):  # solo las que tienen class = "nolazy"
+                img_link = extracted_elements[i].get('data-full-src')
+                extracted_elements[i] = f"![Image|100]({img_link})\n" #Testingt this to fukter out related content
+            elif extracted_elements[i].name == 'p':
+                extracted_elements[i] = f"{extracted_elements[i].text}\n\n"
+            elif extracted_elements[i].name == 'h3' or 'h2':
+                extracted_elements[i] = f"-----------\n ###### **{extracted_elements[i].text}"+"**\n-----------------\n\n"
    
     elements = []
     for i in range(len(extracted_elements)):
