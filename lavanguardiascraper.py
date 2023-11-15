@@ -13,7 +13,7 @@ import json
 
 
 # Arguments
-url = "https://www.lavanguardia.com/politica/20231113/9374947/claves-amnistia-seis-preguntas-clave.html"
+url = "https://www.lavanguardia.com/politica/20231114/9378202/sumar-juega-poquer-nombres-gobierno-progresista-belarra-montero.html"
 
 # GET Request
 def httpGet(url):
@@ -47,15 +47,15 @@ def extractArticle(article):
         if element.name in ['p', 'img', 'h3', 'h2']:
             extracted_elements.append(element)
     for i in range(len(extracted_elements)):
-        if not extracted_elements[i].find_parent('span', class_='content-related content-border related-double'):
+        if not extracted_elements[i].find_parent('span', class_='module-details'):
             if extracted_elements[i].name == 'img' and extracted_elements[i].has_attr('alt') and ("Horizontal" in extracted_elements[i]['alt']):  # solo las que tienen class = "nolazy"
                 img_link = extracted_elements[i].get('data-full-src')
-                extracted_elements[i] = f"![Image|100]({img_link})\n" #Testingt this to fukter out related content
+                extracted_elements[i] = f"![Image|100%]({img_link})\n" # No pie de foto, pero da igual
             elif extracted_elements[i].name == 'p':
                 extracted_elements[i] = f"{extracted_elements[i].text}\n\n"
-            elif extracted_elements[i].name == 'h3' or 'h2':
-                extracted_elements[i] = f"-----------\n ###### **{extracted_elements[i].text}"+"**\n-----------------\n\n"
-   
+            elif extracted_elements[i].name == ('h3' or 'h2') and ('subtitle' in extracted_elements[i]['class']):
+                extracted_elements[i] = f"-----------\n**{extracted_elements[i].text}**\n\n-----------------\n"
+        else: continue
     elements = []
     for i in range(len(extracted_elements)):
         if isinstance(extracted_elements[i],str):
