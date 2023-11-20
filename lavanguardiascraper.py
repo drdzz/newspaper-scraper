@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import json
 
 # TODO
-# Poner mas tipos de noticias solo soporta una, no hay videos ni noticias en directo.
+# Poner mas tipos de noticias solo soporta una, no hay videos ni noticias en directo. LEE LINEA 42 y 95
 # Poner que scarpee todas las noticias y escoja las que mas me gusten
 #     una vez eso funcione poner que salgan todas a la vez en la seccion de noticias de obsidiam, mouseover...etc
 #     que salgan en distintas columans etc.
@@ -13,7 +13,7 @@ import json
 
 
 # Arguments
-url = "https://www.lavanguardia.com/politica/20231114/9378202/sumar-juega-poquer-nombres-gobierno-progresista-belarra-montero.html"
+url = "https://www.lavanguardia.com/opinion/20231119/9390375/amnistia-trasibulo.html"
 
 # GET Request
 def httpGet(url):
@@ -27,7 +27,7 @@ def crearSopa(html):
     return soup
 
 # This suplanta crear Textos /imagenes /videos por separado
-def articleModules(soup):
+def articleModules(soup): 
     titulo = soup.find('h1')
     titulo = "## " + titulo.text
     subtitulos = soup.find_all('h2', class_='epigraph') 
@@ -36,8 +36,10 @@ def articleModules(soup):
         subs.append(sub.text)
     article = soup.find('div', class_='article-modules')
     foto = soup.find('img', {'data-full-src': lambda x: x and 'lavanguardia' in x})
-    foto_portada = f"![Image]({foto.get('data-full-src')})\n"
-    foto_pie =  f"*{foto.get('alt')}*\n"
+    if foto:
+        foto_portada = f"![Image]({foto.get('data-full-src')})\n"
+        foto_pie =  f"*{foto.get('alt')}*\n"
+    else: return titulo, subs, article # creo que solucionado cuidado en linea 95 porque le paso una lista mas corta
     return titulo, subs, foto_portada, foto_pie, article
 
 #
@@ -90,7 +92,7 @@ def noticiaNormal(url):
     html = httpGet(url)
     soup = crearSopa(html)
     modules = articleModules(soup)
-    article = extractArticle(modules[4])
+    article = extractArticle(modules[4]) # Aqui espera algo mas largo de lo que le paso, depende de la noticia!
     noticia = crearNoticia(modules[0],modules[1],modules[2],modules[3],article)
     escribirNoticia(noticia)
     return noticia
