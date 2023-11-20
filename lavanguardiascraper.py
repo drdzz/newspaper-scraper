@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import json
 
 # TODO
-# Poner mas tipos de noticias solo soporta una, no hay videos ni noticias en directo. LEE LINEA 42 y 95
+# Poner mas tipos de noticias solo soporta una, no hay videos ni noticias en directo. LEE LINEA 95
 # Poner que scarpee todas las noticias y escoja las que mas me gusten
 #     una vez eso funcione poner que salgan todas a la vez en la seccion de noticias de obsidiam, mouseover...etc
 #     que salgan en distintas columans etc.
@@ -92,7 +92,7 @@ def noticiaNormal(url):
     html = httpGet(url)
     soup = crearSopa(html)
     modules = articleModules(soup)
-    article = extractArticle(modules[4]) # Aqui espera algo mas largo de lo que le paso, depende de la noticia!
+    article = extractArticle(modules[4]) # Aqui espera algo mas largo de lo que le paso, depende de la noticia! (lee linea 42)
     noticia = crearNoticia(modules[0],modules[1],modules[2],modules[3],article)
     escribirNoticia(noticia)
     return noticia
