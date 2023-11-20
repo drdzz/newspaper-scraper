@@ -13,7 +13,7 @@ import json
 
 
 # Arguments
-url = "https://www.lavanguardia.com/opinion/20231119/9390375/amnistia-trasibulo.html"
+url = "https://www.lavanguardia.com/politica/20231120/9393009/letrados-congreso-favor-tramitar-amnistia-indulto-general.html"
 
 # GET Request
 def httpGet(url):
@@ -31,16 +31,22 @@ def articleModules(soup):
     titulo = soup.find('h1')
     titulo = "## " + titulo.text
     subtitulos = soup.find_all('h2', class_='epigraph') 
-    subs = []
-    for sub in subtitulos:
-        subs.append(sub.text)
+    subs = [sub.text for sub in subtitulos]
+    
     article = soup.find('div', class_='article-modules')
-    foto = soup.find('img', {'data-full-src': lambda x: x and 'lavanguardia' in x})
-    if foto:
-        foto_portada = f"![Image]({foto.get('data-full-src')})\n"
-        foto_pie =  f"*{foto.get('alt')}*\n"
-    else: return titulo, subs, article # creo que solucionado cuidado en linea 95 porque le paso una lista mas corta
-    return titulo, subs, foto_portada, foto_pie, article
+    fotos = soup.find_all('img', {'data-full-src': lambda x: x and 'lavanguardia' in x})
+    images_in_modules = set() if article is None else set(article.find_all('img', {'data-full-src': lambda x: x and 'lavanguardia' in x}))
+    
+    foto_portada = list(set(fotos).difference(images_in_modules))
+
+    if foto_portada:
+        foto_portada_src = foto_portada[0].get('data-full-src')
+        foto_alt = foto_portada[0].get('alt')
+        foto_portada_markdown = f"![Image]({foto_portada_src})\n"
+        foto_pie = f"*{foto_alt}*\n"
+        return titulo, subs, foto_portada_markdown, foto_pie, article
+    
+    return titulo, subs, article
 
 #
 def extractArticle(article):
@@ -70,9 +76,10 @@ def crearNoticia(titulo,subtitulos,foto_portada,foto_pie,extracted_elements):
     noticia = []
     noticia.append(titulo)
     noticia.append("\n---------------\n")
-    for subtitulo in subtitulos:
-        noticia.append(f"- **{subtitulo}**\n")
-    noticia.append("---------------\n")    
+    if subtitulos:
+        for subtitulo in subtitulos:
+            noticia.append(f"- **{subtitulo}**\n")
+            noticia.append("---------------\n")    
     noticia.append(foto_portada)
     noticia.append(foto_pie+"\n\n\n")
     for data in extracted_elements:
@@ -88,10 +95,7 @@ def escribirNoticia(noticia):
     return
 
 # Noticia Normal
-def noticiaNormal(url):
-    html = httpGet(url)
-    soup = crearSopa(html)
-    modules = articleModules(soup)
+def noticiaNormal(modules):
     article = extractArticle(modules[4]) # Aqui espera algo mas largo de lo que le paso, depende de la noticia! (lee linea 42)
     noticia = crearNoticia(modules[0],modules[1],modules[2],modules[3],article)
     escribirNoticia(noticia)
@@ -107,6 +111,16 @@ def noticiaVideo(url):
 # Noticia Opinion
 def noticiaOpinion(url):
     return 
- 
 
-noticiaNormal(url)
+# Noticia 
+def noticia(url):
+    html = httpGet(url)
+    soup = crearSopa(html)
+    modules = articleModules(soup)
+    if len(modules) == 5:
+        noticia = noticiaNormal(modules)
+    elif len(modules) == 3:
+        noticia = noticiaOpinion(modules)
+    return noticia
+
+noticia(url)
