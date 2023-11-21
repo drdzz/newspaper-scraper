@@ -13,7 +13,7 @@ import json
 
 
 # Arguments
-url = "https://www.lavanguardia.com/politica/20231120/9393009/letrados-congreso-favor-tramitar-amnistia-indulto-general.html"
+url = "https://www.lavanguardia.com/internacional/20231120/9390826/milei-argentina-elecciones.html"
 
 # GET Request
 def httpGet(url):
@@ -45,10 +45,9 @@ def articleModules(soup):
         foto_portada_markdown = f"![Image]({foto_portada_src})\n"
         foto_pie = f"*{foto_alt}*\n"
         return titulo, subs, foto_portada_markdown, foto_pie, article
-    
     return titulo, subs, article
 
-#
+# 
 def extractArticle(article):
     extracted_elements = []
     for element in article.find_all():
@@ -103,13 +102,13 @@ def noticiaNormal(modules):
 
 # Noticia Video
 def noticiaVideo(url):
-    html = httpGet(url)
-    soup = crearSopa
-
     return 
 
 # Noticia Opinion
-def noticiaOpinion(url):
+def noticiaOpinion(modules):
+    article = extractArticle(modules[2]) # Aqui espera algo mas largo de lo que le paso, depende de la noticia! (lee linea 42)
+    noticia = crearNoticia(article)
+    escribirNoticia(noticia)
     return 
 
 # Noticia 
