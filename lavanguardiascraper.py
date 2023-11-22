@@ -66,11 +66,18 @@ def extractArticle(article):
     elements = []
     for i in range(len(extracted_elements)):
         if isinstance(extracted_elements[i],str):
-            elements.append(extracted_elements[i])        
-
+            elements.append(extracted_elements[i])
     return elements
     
-# Lista de Noticia
+# Escribe noticia
+def escribirNoticia(noticia):
+    #with open('C:\\Users\\marc.ponce\\Documents\\Obsidian Vault\\noticia.md','w',encoding='utf-8') as file:     # For Windows
+    with open ('/Users/marc.ponce/Documents/Obsidian Vault/noticia.md','w',encoding='utf-8') as file:      #  For MacOS
+        for linea in noticia:
+            file.write(linea)
+    return
+
+"""# Lista de Noticia
 def crearNoticia(titulo,subtitulos,foto_portada,foto_pie,extracted_elements):
     noticia = []
     noticia.append(titulo)
@@ -83,32 +90,42 @@ def crearNoticia(titulo,subtitulos,foto_portada,foto_pie,extracted_elements):
     noticia.append(foto_pie+"\n\n\n")
     for data in extracted_elements:
         noticia.append(data)
-    return noticia
-
-# Escribe noticia
-def escribirNoticia(noticia):
-    #with open('C:\\Users\\marc.ponce\\Documents\\Obsidian Vault\\noticia.md','w',encoding='utf-8') as file:     # For Windows
-    with open ('/Users/marc.ponce/Documents/Obsidian Vault/noticia.md','w',encoding='utf-8') as file:      #  For MacOS
-        for linea in noticia:
-            file.write(linea)
-    return
+    return noticia"""
 
 # Noticia Normal
 def noticiaNormal(modules):
+    noticia = []
     article = extractArticle(modules[4]) # Aqui espera algo mas largo de lo que le paso, depende de la noticia! (lee linea 42)
-    noticia = crearNoticia(modules[0],modules[1],modules[2],modules[3],article)
+    noticia.append(modules[0])
+    noticia.append("\n---------------\n")
+    if modules[1]:
+        for subtitulo in modules[1]:
+            noticia.append(f"- **{subtitulo}**\n")
+            noticia.append("---------------\n")    
+    noticia.append(modules[2])
+    noticia.append(modules[3]+"\n\n\n")
+    for data in article:
+        noticia.append(data)
+    escribirNoticia(noticia)
+    return noticia 
+
+# Noticia Opinion
+def noticiaOpinion(modules):
+    noticia = []
+    article = extractArticle(modules[2]) # Aqui espera algo mas largo de lo que le paso, depende de la noticia! (lee linea 42)
+    noticia.append(modules[0])
+    noticia.append("\n--------------\n")
+    if modules[1]:
+        for subtitulo in modules[1]:
+            noticia.append(f"- **{subtitulo}**\n")
+            noticia.append("------------\n")
+    for data in article:
+        noticia.append(noticia)
     escribirNoticia(noticia)
     return noticia
 
 # Noticia Video
 def noticiaVideo(url):
-    return 
-
-# Noticia Opinion
-def noticiaOpinion(modules):
-    article = extractArticle(modules[2]) # Aqui espera algo mas largo de lo que le paso, depende de la noticia! (lee linea 42)
-    noticia = crearNoticia(article)
-    escribirNoticia(noticia)
     return 
 
 # Noticia 
@@ -120,6 +137,7 @@ def noticia(url):
         noticia = noticiaNormal(modules)
     elif len(modules) == 3:
         noticia = noticiaOpinion(modules)
+
     return noticia
 
 noticia(url)
