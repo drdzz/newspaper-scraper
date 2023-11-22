@@ -14,7 +14,6 @@ import json
 
 # Arguments
 url = "https://www.lavanguardia.com/internacional/20231120/9390826/milei-argentina-elecciones.html"
-
 # GET Request
 def httpGet(url):
     resp = requests.get(url)
@@ -77,21 +76,6 @@ def escribirNoticia(noticia):
             file.write(linea)
     return
 
-"""# Lista de Noticia
-def crearNoticia(titulo,subtitulos,foto_portada,foto_pie,extracted_elements):
-    noticia = []
-    noticia.append(titulo)
-    noticia.append("\n---------------\n")
-    if subtitulos:
-        for subtitulo in subtitulos:
-            noticia.append(f"- **{subtitulo}**\n")
-            noticia.append("---------------\n")    
-    noticia.append(foto_portada)
-    noticia.append(foto_pie+"\n\n\n")
-    for data in extracted_elements:
-        noticia.append(data)
-    return noticia"""
-
 # Noticia Normal
 def noticiaNormal(modules):
     noticia = []
@@ -120,7 +104,7 @@ def noticiaOpinion(modules):
             noticia.append(f"- **{subtitulo}**\n")
             noticia.append("------------\n")
     for data in article:
-        noticia.append(noticia)
+        noticia.append(data)
     escribirNoticia(noticia)
     return noticia
 
