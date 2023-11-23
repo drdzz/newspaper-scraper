@@ -1,19 +1,23 @@
 import requests
-import openai
+from openai import OpenAI
 import sys
 from bs4 import BeautifulSoup
 import json
 
 # TODO
-# Poner mas tipos de noticias solo soporta una, no hay videos ni noticias en directo. LEE LINEA 95
-# Poner que scarpee todas las noticias y escoja las que mas me gusten
-#     una vez eso funcione poner que salgan todas a la vez en la seccion de noticias de obsidiam, mouseover...etc
-#     que salgan en distintas columans etc.
-# Falta lo de procesar los textos por algun tipo de IA
+# - AI: Poner que scarpee todas las noticias y escoja las que mas me gusten
+# - AI: Falta lo de procesar los textos por algun tipo de IA (creo que sera una mierda)
+# - Falta hacer que presente las noticias en algun tipo de Dashboard en Obsidian
+# - Falta hacer un scraper aparte de youtube con API key de google, sacar el video de lavanguardia en html es rarisimo y a obisidan no le mola, 
+#   pero youtube si y queda muy bonito embedded, hace falta buscar el titular en youtube y siempre es el primer resultado. El scrapeo se ha de hacer en json...etc
 
 
 # Arguments
-url = "https://www.lavanguardia.com/internacional/20231120/9390826/milei-argentina-elecciones.html"
+url = "https://www.lavanguardia.com/internacional/20231123/9399334/empieza-alto-fuego-gaza.html"
+youtube_url = "https://www.youtube.com/results?search_query=+"
+
+#client = OpenAI(api_key='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')
+
 # GET Request
 def httpGet(url):
     resp = requests.get(url)
@@ -25,19 +29,41 @@ def crearSopa(html):
     soup = BeautifulSoup(html, 'html.parser')
     return soup
 
+def gpt():
+    response = client.chat.completions.create(
+    model="gpt-3.5-turbo-1106",
+    response_format={ "type": "json_object" },
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant designed to enumerate all factions/parties/entities from a text and decide if author of text shows any bias towards any of them, result shall be short."},
+        {"role": "user", "content": "La alianza entre el Partido Popular Europeo el grupo liberal y la ultraderecha ha convertido esta tarde el -semivacío- hemiciclo del Parlamento Europeo en Estrasburgo en un auténtico ring de boxeo entre los defensores y los detractores de la ley de amnistía que actualmente se tramita en el Congreso, una iniciativa que de acuerdo con el Gobierno, los socialistas y la izquierda europea es un asunto constitucional interno pero que los primeros presentan como el principio del fin no de España sino de Europa. En el centro de todas las miradas la Comisión Europea que hoy se ha puesto de perfil y ha evitado avanzar cualquier conclusión sobre el contenido de la ley."}
+    ]
+    )
+    print(response.choices[0])
+
+# Youtube Video Finder
+def videoFinder(youtube_url,titular):
+        url = youtube_url+titular
+        html = httpGet(url)
+        soup = crearSopa(html)
+        link = soup.find('a')
+        if link: 
+            print(link)
+        else:
+            print("no") # esto es para debug, aqui esta el punto de trabajo ahora mismo. Scrapear el link de la primera noticia resultante de la busqueda de YT
+
+
 # This suplanta crear Textos /imagenes /videos por separado
 def articleModules(soup): 
     titulo = soup.find('h1')
     titulo = "## " + titulo.text
     subtitulos = soup.find_all('h2', class_='epigraph') 
     subs = [sub.text for sub in subtitulos]
-    
+    video = soup.find('video')
+    print(video)
     article = soup.find('div', class_='article-modules')
     fotos = soup.find_all('img', {'data-full-src': lambda x: x and 'lavanguardia' in x})
     images_in_modules = set() if article is None else set(article.find_all('img', {'data-full-src': lambda x: x and 'lavanguardia' in x}))
-    
     foto_portada = list(set(fotos).difference(images_in_modules))
-
     if foto_portada:
         foto_portada_src = foto_portada[0].get('data-full-src')
         foto_alt = foto_portada[0].get('alt')
@@ -46,7 +72,7 @@ def articleModules(soup):
         return titulo, subs, foto_portada_markdown, foto_pie, article
     return titulo, subs, article
 
-# 
+# This extracts the contents inside the paragraphs
 def extractArticle(article):
     extracted_elements = []
     for element in article.find_all():
@@ -124,4 +150,6 @@ def noticia(url):
 
     return noticia
 
-noticia(url)
+#noticia(url)) #funciona 
+
+videoFinder(youtube_url,'No tengo dinero') # estoy probando este metodo, falta scrapear
