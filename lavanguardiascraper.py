@@ -5,23 +5,23 @@ from bs4 import BeautifulSoup
 import json
 
 # TODO
-# - AI: Poner que scarpee todas las noticias y escoja las que mas me gusten
-# - AI: Falta lo de procesar los textos por algun tipo de IA (creo que sera una mierda)
+# - AI: Poner que scarpee todas las noticias y escoja las que mas me gusten (tematicas, asi se pueden organizar en obsidian)
 # - Falta hacer que presente las noticias en algun tipo de Dashboard en Obsidian
+# - AI: Falta lo de procesar los textos por algun tipo de IA (creo que sera una mierda)
 # - Falta hacer un scraper aparte de youtube con API key de google, sacar el video de lavanguardia en html es rarisimo y a obisidan no le mola, 
 #   pero youtube si y queda muy bonito embedded, hace falta buscar el titular en youtube y siempre es el primer resultado. El scrapeo se ha de hacer en json...etc
 
 
 # Arguments
-url = "https://www.lavanguardia.com/internacional/20231123/9399334/empieza-alto-fuego-gaza.html"
+url = "https://www.lavanguardia.com/politica/20231124/9402838/sanchez-confia-intermediario-negociar-junts-verificacion-partidos-alejados-ayudar.html"
+#url2 = "https://www.lavanguardia.com/internacional/20231124/9402260/orban-hungria-ue-leyen-consulta-antieuropea-ultraconservador.html"
 youtube_url = "https://www.youtube.com/results?search_query=+"
-
-#client = OpenAI(api_key='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')
+#client = OpenAI(api_key='sk-')
 
 # GET Request
 def httpGet(url):
     resp = requests.get(url)
-    html = resp.text
+    html = resp
     return html
 
 # BeautifulSoup object 
@@ -29,37 +29,34 @@ def crearSopa(html):
     soup = BeautifulSoup(html, 'html.parser')
     return soup
 
-def gpt():
+def gpt(): # Para nada esto funciona solo estaba tanteando textos sueltos y experimentando con prompts
     response = client.chat.completions.create(
     model="gpt-3.5-turbo-1106",
     response_format={ "type": "json_object" },
     messages=[
         {"role": "system", "content": "You are a helpful assistant designed to enumerate all factions/parties/entities from a text and decide if author of text shows any bias towards any of them, result shall be short."},
         {"role": "user", "content": "La alianza entre el Partido Popular Europeo el grupo liberal y la ultraderecha ha convertido esta tarde el -semivacío- hemiciclo del Parlamento Europeo en Estrasburgo en un auténtico ring de boxeo entre los defensores y los detractores de la ley de amnistía que actualmente se tramita en el Congreso, una iniciativa que de acuerdo con el Gobierno, los socialistas y la izquierda europea es un asunto constitucional interno pero que los primeros presentan como el principio del fin no de España sino de Europa. En el centro de todas las miradas la Comisión Europea que hoy se ha puesto de perfil y ha evitado avanzar cualquier conclusión sobre el contenido de la ley."}
-    ]
+    ] 
     )
     print(response.choices[0])
 
-# Youtube Video Finder
-def videoFinder(youtube_url,titular):
-        url = youtube_url+titular
-        html = httpGet(url)
-        soup = crearSopa(html)
-        link = soup.find('a')
-        if link: 
-            print(link)
+# buscaod Youtube Video 
+def videoFinder(titular): # esta era la idea, estoy apunto de desecharla, aunque esta es la manera mas sencilla seguro
+        search_url = f'https://www.googleapis.com/youtube/v3/search?key={yt_API_key}&part=snippet&type=video&q={titular}'
+        response = httpGet(search_url)
+        data = json.loads(response.text)
+        if 'items' in data and len(data['items']) > 0:
+            first_video_id = data['items'][0]['id']['videoId']
         else:
             print("no") # esto es para debug, aqui esta el punto de trabajo ahora mismo. Scrapear el link de la primera noticia resultante de la busqueda de YT
 
-
-# This suplanta crear Textos /imagenes /videos por separado
+# This suplanta crear Textos /imagenes /videos por separado, separa cabecera y noticia en si 
 def articleModules(soup): 
     titulo = soup.find('h1')
     titulo = "## " + titulo.text
     subtitulos = soup.find_all('h2', class_='epigraph') 
     subs = [sub.text for sub in subtitulos]
-    video = soup.find('video')
-    print(video)
+    # video = soup.find('video')
     article = soup.find('div', class_='article-modules')
     fotos = soup.find_all('img', {'data-full-src': lambda x: x and 'lavanguardia' in x})
     images_in_modules = set() if article is None else set(article.find_all('img', {'data-full-src': lambda x: x and 'lavanguardia' in x}))
@@ -69,10 +66,10 @@ def articleModules(soup):
         foto_alt = foto_portada[0].get('alt')
         foto_portada_markdown = f"![Image]({foto_portada_src})\n"
         foto_pie = f"*{foto_alt}*\n"
-        return titulo, subs, foto_portada_markdown, foto_pie, article
+        return titulo, subs, foto_portada_markdown, foto_pie, article # es posible que hayan mas condicione spara que devuelva distintas cosas
     return titulo, subs, article
 
-# This extracts the contents inside the paragraphs
+# Extrae los distintos contenidos dentro de los parrafos, una cosa es la cabecera la otra la noticia
 def extractArticle(article):
     extracted_elements = []
     for element in article.find_all():
@@ -97,7 +94,7 @@ def extractArticle(article):
 # Escribe noticia
 def escribirNoticia(noticia):
     #with open('C:\\Users\\marc.ponce\\Documents\\Obsidian Vault\\noticia.md','w',encoding='utf-8') as file:     # For Windows
-    with open ('/Users/marc.ponce/Documents/Obsidian Vault/noticia.md','w',encoding='utf-8') as file:      #  For MacOS
+    with open ('/Users/marc.ponce/Documents/Obsidian Vault/test.md','w',encoding='utf-8') as file:      #  For MacOS
         for linea in noticia:
             file.write(linea)
     return
@@ -105,11 +102,12 @@ def escribirNoticia(noticia):
 # Noticia Normal
 def noticiaNormal(modules):
     noticia = []
-    article = extractArticle(modules[4]) # Aqui espera algo mas largo de lo que le paso, depende de la noticia! (lee linea 42)
+    article = extractArticle(modules[4]) 
     noticia.append(modules[0])
     noticia.append("\n---------------\n")
     if modules[1]:
         for subtitulo in modules[1]:
+            print(subtitulo)
             noticia.append(f"- **{subtitulo}**\n")
             noticia.append("---------------\n")    
     noticia.append(modules[2])
@@ -122,7 +120,7 @@ def noticiaNormal(modules):
 # Noticia Opinion
 def noticiaOpinion(modules):
     noticia = []
-    article = extractArticle(modules[2]) # Aqui espera algo mas largo de lo que le paso, depende de la noticia! (lee linea 42)
+    article = extractArticle(modules[2])
     noticia.append(modules[0])
     noticia.append("\n--------------\n")
     if modules[1]:
@@ -141,6 +139,7 @@ def noticiaVideo(url):
 # Noticia 
 def noticia(url):
     html = httpGet(url)
+    html = html.text
     soup = crearSopa(html)
     modules = articleModules(soup)
     if len(modules) == 5:
@@ -150,6 +149,7 @@ def noticia(url):
 
     return noticia
 
-#noticia(url)) #funciona 
+noticia(url) #funciona 
 
-videoFinder(youtube_url,'No tengo dinero') # estoy probando este metodo, falta scrapear
+#videoFinder('No tengo dinero') # estoy probando este metodo, falta scrapear ES UNA PUTA MOVIDA youtube rancios
+
