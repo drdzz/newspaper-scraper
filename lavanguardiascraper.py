@@ -3,19 +3,27 @@ from openai import OpenAI
 import sys
 from bs4 import BeautifulSoup
 import json
+import re
+
+from selenium import webdriver 
+import pandas as pd 
+from selenium.webdriver.common.by import By 
+from selenium.webdriver.support.ui import WebDriverWait 
+from selenium.webdriver.support import expected_conditions as EC
 
 # TODO
-# - AI: Poner que scarpee todas las noticias y escoja las que mas me gusten (tematicas, asi se pueden organizar en obsidian)
 # - Falta hacer que presente las noticias en algun tipo de Dashboard en Obsidian
-# - AI: Falta lo de procesar los textos por algun tipo de IA (creo que sera una mierda)
 # - Falta hacer un scraper aparte de youtube con API key de google, sacar el video de lavanguardia en html es rarisimo y a obisidan no le mola, 
 #   pero youtube si y queda muy bonito embedded, hace falta buscar el titular en youtube y siempre es el primer resultado. El scrapeo se ha de hacer en json...etc
+# - AI: Poner que analize todas los titulares y escoja
+# - AI: Falta lo de procesar los textos por algun tipo de IA (creo que sera una mierda)
 
 
 # Arguments
 url = "https://www.lavanguardia.com/politica/20231124/9402838/sanchez-confia-intermediario-negociar-junts-verificacion-partidos-alejados-ayudar.html"
 #url2 = "https://www.lavanguardia.com/internacional/20231124/9402260/orban-hungria-ue-leyen-consulta-antieuropea-ultraconservador.html"
 youtube_url = "https://www.youtube.com/results?search_query=+"
+lavanguardia = "https://www.lavanguardia.com"
 #client = OpenAI(api_key='sk-')
 
 # GET Request
@@ -42,13 +50,18 @@ def gpt(): # Para nada esto funciona solo estaba tanteando textos sueltos y expe
 
 # buscaod Youtube Video 
 def videoFinder(titular): # esta era la idea, estoy apunto de desecharla, aunque esta es la manera mas sencilla seguro
-        search_url = f'https://www.googleapis.com/youtube/v3/search?key={yt_API_key}&part=snippet&type=video&q={titular}'
-        response = httpGet(search_url)
-        data = json.loads(response.text)
-        if 'items' in data and len(data['items']) > 0:
-            first_video_id = data['items'][0]['id']['videoId']
-        else:
-            print("no") # esto es para debug, aqui esta el punto de trabajo ahora mismo. Scrapear el link de la primera noticia resultante de la busqueda de YT
+        search_url = f'{youtube_url}{titular}'
+        search_url = search_url.replace(' ','+')
+        driver = webdriver.Chrome() 
+        driver.get(search_url)
+        user_data = driver.find_elements('xpath', '//*[@id="video-title"]')
+        links = []
+        for i in user_data:
+                    links.append(i.get_attribute('href'))
+
+        print(links[0])
+                
+
 
 # This suplanta crear Textos /imagenes /videos por separado, separa cabecera y noticia en si 
 def articleModules(soup): 
@@ -149,7 +162,30 @@ def noticia(url):
 
     return noticia
 
-noticia(url) #funciona 
+def noticiasLinks(lavanguardia):
+    noticias = []
+    titulares = []
+    links = []
+    html = httpGet(lavanguardia)
+    html = html.text
+    soup = crearSopa(html)
+    noticias = soup.find_all('a', itemprop='headline')
+    for noticia in noticias:
+        link = f"{lavanguardia}{noticia.get('href')}"
+        noticia = noticia.text
+        links.append(link)
+        titulares.append(noticia)
+    return titulares, links # eventualmente lo unico que me interesarán seran los links
 
-#videoFinder('No tengo dinero') # estoy probando este metodo, falta scrapear ES UNA PUTA MOVIDA youtube rancios
 
+#noticia(url) #funciona 
+videoFinder('No tengo dinero') # estoy probando este metodo, falta scrapear ES UNA PUTA MOVIDA youtube rancios
+
+
+#noticias = noticiasLinks(lavanguardia)[0]
+#links = noticiasLinks(lavanguardia)[1]
+
+"""for i in range(len(noticias)):
+    if "Ofertas" in noticias[i]:
+       print("YESSSSSSSSSSSS")
+"""
