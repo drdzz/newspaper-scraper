@@ -12,8 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 # TODO
 # - Falta hacer que presente las noticias en algun tipo de Dashboard en Obsidian
-# - Presentacion de si hay quote justo despues de imagen en articulo, solo pon un newline extra despues de cada foto, just do it
-# - Falta juntar crear lista de noticias y ejecutar todo en cada uno de los links
+
 # - AI: Poner que analize todas los titulares y escoja
 # - AI: Falta lo de procesar los textos por algun tipo de IA (creo que sera una mierda)
 
@@ -111,8 +110,9 @@ def extractArticle(article):
 def escribirNoticia(noticia,titulo):
     #with open('C:\\Users\\marc.ponce\\Documents\\Obsidian Vault\\noticia.md','w',encoding='utf-8') as file:     # For Windows
     with open (f'/Users/marc.ponce/Documents/Obsidian Vault/News/{titulo}.md','w',encoding='utf-8') as file:      #  For MacOS
-        for linea in noticia:
-            file.write(linea)
+        for i in range(len(noticia)):
+            if i>0:
+                file.write(noticia[i])
     return
 
 # Noticia Normal
