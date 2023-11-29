@@ -19,8 +19,9 @@ from selenium.webdriver.support import expected_conditions as EC
 # - AI: Falta lo de procesar los textos por algun tipo de IA (creo que sera una mierda)
 
 
-# Arguments
-url = "https://www.lavanguardia.com/politica/20231124/9402838/sanchez-confia-intermediario-negociar-junts-verificacion-partidos-alejados-ayudar.html"
+# Arguments 
+url = "https://www.lavanguardia.com/internacional/20231128/9412163/dormimos-sillas.html"
+#url = "https://www.lavanguardia.com/internacional/20231129/9413984/rio-mar.html"
 #url2 = "https://www.lavanguardia.com/internacional/20231124/9402260/orban-hungria-ue-leyen-consulta-antieuropea-ultraconservador.html"
 youtube_url = "https://www.youtube.com/results?search_query=+"
 lavanguardia = "https://www.lavanguardia.com"
@@ -58,29 +59,35 @@ def videoFinder(titular): # esta era la idea, estoy apunto de desecharla, aunque
         links = []
         for i in user_data:
                     links.append(i.get_attribute('href'))
-
-        print(links[0])
-                
-
+        link = links[0]
+        return link            
 
 # This suplanta crear Textos /imagenes /videos por separado, separa cabecera y noticia en si 
 def articleModules(soup): 
     titulo = soup.find('h1')
-    titulo = "## " + titulo.text
+    titulo1 = titulo.text
+    titulo = "## " + titulo1
     subtitulos = soup.find_all('h2', class_='epigraph') 
     subs = [sub.text for sub in subtitulos]
-    # video = soup.find('video')
+    video_tags = soup.find('div', class_='multimedia-video') #, class_='jw-video jw-reset')
+
     article = soup.find('div', class_='article-modules')
     fotos = soup.find_all('img', {'data-full-src': lambda x: x and 'lavanguardia' in x})
     images_in_modules = set() if article is None else set(article.find_all('img', {'data-full-src': lambda x: x and 'lavanguardia' in x}))
     foto_portada = list(set(fotos).difference(images_in_modules))
+
+    if video_tags:
+        link = videoFinder(titulo1)
+        link = f"![]({link})"
+        return titulo, subs, link
     if foto_portada:
         foto_portada_src = foto_portada[0].get('data-full-src')
         foto_alt = foto_portada[0].get('alt')
         foto_portada_markdown = f"![Image]({foto_portada_src})\n"
         foto_pie = f"*{foto_alt}*\n"
         return titulo, subs, foto_portada_markdown, foto_pie, article # es posible que hayan mas condicione spara que devuelva distintas cosas
-    return titulo, subs, article
+    else:
+        return titulo, subs, article
 
 # Extrae los distintos contenidos dentro de los parrafos, una cosa es la cabecera la otra la noticia
 def extractArticle(article):
@@ -133,6 +140,7 @@ def noticiaNormal(modules):
 # Noticia Opinion
 def noticiaOpinion(modules):
     noticia = []
+    print(modules)
     article = extractArticle(modules[2])
     noticia.append(modules[0])
     noticia.append("\n--------------\n")
@@ -158,8 +166,8 @@ def noticia(url):
     if len(modules) == 5:
         noticia = noticiaNormal(modules)
     elif len(modules) == 3:
+        # Noticia video tambien tiene 3 modulos solo!
         noticia = noticiaOpinion(modules)
-
     return noticia
 
 def noticiasLinks(lavanguardia):
@@ -178,8 +186,8 @@ def noticiasLinks(lavanguardia):
     return titulares, links # eventualmente lo unico que me interesarán seran los links
 
 
-#noticia(url) #funciona 
-videoFinder('No tengo dinero') # estoy probando este metodo, falta scrapear ES UNA PUTA MOVIDA youtube rancios
+noticia(url) #funciona 
+#videoFinder('No tengo dinero') # estoy probando este metodo, falta scrapear ES UNA PUTA MOVIDA youtube rancios
 
 
 #noticias = noticiasLinks(lavanguardia)[0]
