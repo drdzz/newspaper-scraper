@@ -19,9 +19,6 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 # Arguments 
-#url = "https://www.lavanguardia.com/internacional/20231128/9412163/dormimos-sillas.html"
-#url = "https://www.lavanguardia.com/internacional/20231129/9413984/rio-mar.html"
-url = "https://www.lavanguardia.com/internacional/20231128/9414122/tregua-gaza-llega-miercoles-sexto-ultimo-dia-hay-prorroga.html"
 youtube_url = "https://www.youtube.com/results?search_query=+"
 lavanguardia = "https://www.lavanguardia.com"
 #client = OpenAI(api_key='sk-')
@@ -111,34 +108,35 @@ def extractArticle(article):
     return elements
     
 # Escribe noticia
-def escribirNoticia(noticia):
+def escribirNoticia(noticia,titulo):
     #with open('C:\\Users\\marc.ponce\\Documents\\Obsidian Vault\\noticia.md','w',encoding='utf-8') as file:     # For Windows
-    with open ('/Users/marc.ponce/Documents/Obsidian Vault/test.md','w',encoding='utf-8') as file:      #  For MacOS
+    with open (f'/Users/marc.ponce/Documents/Obsidian Vault/News/{titulo}.md','w',encoding='utf-8') as file:      #  For MacOS
         for linea in noticia:
             file.write(linea)
     return
 
 # Noticia Normal
-def noticiaNormal(modules):
+def noticiaNormal(modules,titulo):
     noticia = []
     article = extractArticle(modules[4]) 
     noticia.append(modules[0])
     noticia.append("\n---------------\n")
     if modules[1]:
         for subtitulo in modules[1]:
-            print(subtitulo)
+            #print(subtitulo)
             noticia.append(f"- **{subtitulo}**\n")
             noticia.append("---------------\n")    
     noticia.append(modules[2])
     noticia.append(modules[3]+"\n\n\n")
     for data in article:
         noticia.append(data)
-    escribirNoticia(noticia)
+    escribirNoticia(noticia,titulo)
     return noticia 
 
 # Noticia Opinion
-def noticiaOpinion(modules):
+def noticiaOpinion(modules,titulo):
     noticia = []
+    #(modules)
     article = extractArticle(modules[2])
     noticia.append(modules[0])
     noticia.append("\n--------------\n")
@@ -148,11 +146,11 @@ def noticiaOpinion(modules):
             noticia.append("------------\n")
     for data in article:
         noticia.append(data)
-    escribirNoticia(noticia)
+    escribirNoticia(noticia, titulo)
     return noticia
 
 # Noticia Video
-def noticiaVideo(modules):
+def noticiaVideo(modules,titulo):
     noticia = []
     article = extractArticle(modules[3]) 
     noticia.append(modules[0])
@@ -165,23 +163,22 @@ def noticiaVideo(modules):
     noticia.append("\n\n\n")
     for data in article:
         noticia.append(data)
-    escribirNoticia(noticia)
+    escribirNoticia(noticia,titulo)
     
     return noticia 
 
 # Noticia 
-def noticia(url):
+def noticia(url,titulo):
     html = httpGet(url)
     html = html.text
     soup = crearSopa(html)
     modules = articleModules(soup)
-    print(len(modules))
     if len(modules) == 5:
-        noticia = noticiaNormal(modules)
+        noticia = noticiaNormal(modules,titulo)
     elif len(modules) == 3:
-        noticia = noticiaOpinion(modules)
+        noticia = noticiaOpinion(modules,titulo)
     elif len(modules) == 4:
-        noticia = noticiaVideo(modules)
+        noticia = noticiaVideo(modules,titulo)
     return noticia
 
 def noticiasLinks(lavanguardia):
@@ -193,21 +190,23 @@ def noticiasLinks(lavanguardia):
     soup = crearSopa(html)
     noticias = soup.find_all('a', itemprop='headline')
     for noticia in noticias:
-        link = f"{lavanguardia}{noticia.get('href')}"
-        noticia = noticia.text
-        links.append(link)
-        titulares.append(noticia)
+        if (noticia.text != 'Últimas noticias') or ('/vida/' in link):
+            link = f"{lavanguardia}{noticia.get('href')}"    
+            noticia = noticia.text
+            links.append(link)
+            titulares.append(noticia)
     return titulares, links # eventualmente lo unico que me interesarán seran los links
 
 
-noticia(url) #funciona 
-#videoFinder('No tengo dinero') # estoy probando este metodo, falta scrapear ES UNA PUTA MOVIDA youtube rancios
+noticias = noticiasLinks(lavanguardia)[0]
+links = noticiasLinks(lavanguardia)[1]
 
-
-#noticias = noticiasLinks(lavanguardia)[0]
-#links = noticiasLinks(lavanguardia)[1]
-
-"""for i in range(len(noticias)):
-    if "Ofertas" in noticias[i]:
-       print("YESSSSSSSSSSSS")
-"""
+for i in range(len(noticias)):
+    try:
+        noticia(links[i],noticias[i])
+    except: 
+        print("algo ocurrio para:")
+        print(noticias[i])
+        print(links[i])
+        
+#cultura, vida, launi, natural, local, politica, internacional
