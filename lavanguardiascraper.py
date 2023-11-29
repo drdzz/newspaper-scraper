@@ -4,7 +4,6 @@ import sys
 from bs4 import BeautifulSoup
 import json
 import re
-
 from selenium import webdriver 
 import pandas as pd 
 from selenium.webdriver.common.by import By 
@@ -78,8 +77,8 @@ def articleModules(soup):
 
     if video_tags:
         link = videoFinder(titulo1)
-        link = f"![]({link})"
-        return titulo, subs, link
+        link = f"![|100%]({link})"
+        return titulo, subs, link, article
     if foto_portada:
         foto_portada_src = foto_portada[0].get('data-full-src')
         foto_alt = foto_portada[0].get('alt')
@@ -140,7 +139,6 @@ def noticiaNormal(modules):
 # Noticia Opinion
 def noticiaOpinion(modules):
     noticia = []
-    print(modules)
     article = extractArticle(modules[2])
     noticia.append(modules[0])
     noticia.append("\n--------------\n")
@@ -154,8 +152,22 @@ def noticiaOpinion(modules):
     return noticia
 
 # Noticia Video
-def noticiaVideo(url):
-    return 
+def noticiaVideo(modules):
+    noticia = []
+    article = extractArticle(modules[3]) 
+    noticia.append(modules[0])
+    noticia.append("\n---------------\n")
+    if modules[1]:
+        for subtitulo in modules[1]:
+            noticia.append(f"- **{subtitulo}**\n")
+            noticia.append("---------------\n")    
+    noticia.append(modules[2])
+    noticia.append("\n\n\n")
+    for data in article:
+        noticia.append(data)
+    escribirNoticia(noticia)
+    
+    return noticia 
 
 # Noticia 
 def noticia(url):
@@ -163,11 +175,13 @@ def noticia(url):
     html = html.text
     soup = crearSopa(html)
     modules = articleModules(soup)
+    print(len(modules))
     if len(modules) == 5:
         noticia = noticiaNormal(modules)
     elif len(modules) == 3:
-        # Noticia video tambien tiene 3 modulos solo!
         noticia = noticiaOpinion(modules)
+    elif len(modules) == 4:
+        noticia = noticiaVideo(modules)
     return noticia
 
 def noticiasLinks(lavanguardia):
