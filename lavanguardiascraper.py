@@ -12,16 +12,16 @@ from selenium.webdriver.support import expected_conditions as EC
 
 # TODO
 # - Falta hacer que presente las noticias en algun tipo de Dashboard en Obsidian
-# - Falta hacer un scraper aparte de youtube con API key de google, sacar el video de lavanguardia en html es rarisimo y a obisidan no le mola, 
-#   pero youtube si y queda muy bonito embedded, hace falta buscar el titular en youtube y siempre es el primer resultado. El scrapeo se ha de hacer en json...etc
+# - Presentacion de si hay quote justo despues de imagen en articulo, solo pon un newline extra despues de cada foto, just do it
+# - Falta juntar crear lista de noticias y ejecutar todo en cada uno de los links
 # - AI: Poner que analize todas los titulares y escoja
 # - AI: Falta lo de procesar los textos por algun tipo de IA (creo que sera una mierda)
 
 
 # Arguments 
-url = "https://www.lavanguardia.com/internacional/20231128/9412163/dormimos-sillas.html"
+#url = "https://www.lavanguardia.com/internacional/20231128/9412163/dormimos-sillas.html"
 #url = "https://www.lavanguardia.com/internacional/20231129/9413984/rio-mar.html"
-#url2 = "https://www.lavanguardia.com/internacional/20231124/9402260/orban-hungria-ue-leyen-consulta-antieuropea-ultraconservador.html"
+url = "https://www.lavanguardia.com/internacional/20231128/9414122/tregua-gaza-llega-miercoles-sexto-ultimo-dia-hay-prorroga.html"
 youtube_url = "https://www.youtube.com/results?search_query=+"
 lavanguardia = "https://www.lavanguardia.com"
 #client = OpenAI(api_key='sk-')
