@@ -1,4 +1,5 @@
 import requests
+import traceback
 from openai import OpenAI
 import sys
 from bs4 import BeautifulSoup
@@ -200,13 +201,29 @@ def noticiasLinks(lavanguardia):
 
 noticias = noticiasLinks(lavanguardia)[0]
 links = noticiasLinks(lavanguardia)[1]
-
+noticiaserror = []
+linkserror = []
 for i in range(len(noticias)):
+    if "emagister" in links[i] or "https://www.lavanguardia.comhttps://www.lavanguardia.com" in links[i]:
+        continue  # Skip this link
     try:
-        noticia(links[i],noticias[i])
-    except: 
+        noticia(links[i], noticias[i])
+    except Exception as exc: 
+        print(exc)
+        noticiaserror.append(noticias[i])
+        linkserror.append(links[i])
         print("algo ocurrio para:")
-        print(noticias[i])
         print(links[i])
-        
+        # traceback.print_exc()
+
+print("Ahora Errores:")
+
+for i in range(len(noticiaserror)):
+    try:
+        noticia(linkserror[i], noticiaserror[i])
+    except Exception as exc: 
+        print(exc)
+        print("Otra vez para para:")
+        print(linkserror[i])
+
 #cultura, vida, launi, natural, local, politica, internacional
