@@ -49,6 +49,7 @@ def gpt(): # Para nada esto funciona solo estaba tanteando textos sueltos y expe
 def videoFinder(titular): # esta era la idea, estoy apunto de desecharla, aunque esta es la manera mas sencilla seguro
         search_url = f'{youtube_url}{titular}'
         search_url = search_url.replace(' ','+')
+        search_url = search_url.replace('%','')
         driver = webdriver.Chrome() 
         driver.get(search_url)
         user_data = driver.find_elements('xpath', '//*[@id="video-title"]')
@@ -65,13 +66,12 @@ def articleModules(soup):
     titulo = "## " + titulo1
     subtitulos = soup.find_all('h2', class_='epigraph') 
     subs = [sub.text for sub in subtitulos]
-    video_tags = soup.find('div', class_='multimedia-video') #, class_='jw-video jw-reset')
+    video_tags = soup.find('div', class_='main-video') #, class_='jw-video jw-reset')
 
     article = soup.find('div', class_='article-modules')
     fotos = soup.find_all('img', {'data-full-src': lambda x: x and 'lavanguardia' in x})
     images_in_modules = set() if article is None else set(article.find_all('img', {'data-full-src': lambda x: x and 'lavanguardia' in x}))
     foto_portada = list(set(fotos).difference(images_in_modules))
-
     if video_tags:
         link = videoFinder(titulo1)
         link = f"![|100%]({link})"
@@ -203,18 +203,19 @@ noticias = noticiasLinks(lavanguardia)[0]
 links = noticiasLinks(lavanguardia)[1]
 noticiaserror = []
 linkserror = []
+
 for i in range(len(noticias)):
     if "emagister" in links[i] or "https://www.lavanguardia.comhttps://www.lavanguardia.com" in links[i]:
         continue  # Skip this link
     try:
         noticia(links[i], noticias[i])
     except Exception as exc: 
-        print(exc)
+        #print(exc)
         noticiaserror.append(noticias[i])
         linkserror.append(links[i])
         print("algo ocurrio para:")
-        print(links[i])
-        # traceback.print_exc()
+        print(noticias[i])
+        #traceback.print_exc()
 
 print("Ahora Errores:")
 
@@ -225,5 +226,3 @@ for i in range(len(noticiaserror)):
         print(exc)
         print("Otra vez para para:")
         print(linkserror[i])
-
-#cultura, vida, launi, natural, local, politica, internacional
