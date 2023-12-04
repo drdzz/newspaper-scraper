@@ -12,13 +12,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 # TODO
-# - Falta hacer que presente las noticias en algun tipo de Dashboard en Obsidian
-
+# - Esta casi done, solo falta Front-End en Obsidian para la presentacion de notiias.
 # - AI: Poner que analize todas los titulares y escoja
 # - AI: Falta lo de procesar los textos por algun tipo de IA (creo que sera una mierda)
 
 
-# Arguments 
+# Arguments  
 youtube_url = "https://www.youtube.com/results?search_query=+"
 lavanguardia = "https://www.lavanguardia.com"
 #client = OpenAI(api_key='sk-')
@@ -47,7 +46,7 @@ def gpt(): # Para nada esto funciona solo estaba tanteando textos sueltos y expe
 
 # buscaod Youtube Video 
 def videoFinder(titular): # esta era la idea, estoy apunto de desecharla, aunque esta es la manera mas sencilla seguro
-        search_url = f'{youtube_url}{titular}'
+        search_url = f'{youtube_url}{titular}lavanguardia'
         search_url = search_url.replace(' ','+')
         search_url = search_url.replace('%','')
         driver = webdriver.Chrome() 
@@ -117,10 +116,11 @@ def escribirNoticia(noticia,titulo):
     return
 
 # Noticia Normal
-def noticiaNormal(modules,titulo):
+def noticiaNormal(modules,titulo,tema):
     noticia = []
-    article = extractArticle(modules[4]) 
+    article = extractArticle(modules[4])
     noticia.append(modules[0])
+    noticia.append(f"#news #{tema}\n")
     noticia.append("\n---------------\n")
     if modules[1]:
         for subtitulo in modules[1]:
@@ -135,11 +135,11 @@ def noticiaNormal(modules,titulo):
     return noticia 
 
 # Noticia Opinion
-def noticiaOpinion(modules,titulo):
+def noticiaOpinion(modules,titulo,tema):
     noticia = []
-    #(modules)
     article = extractArticle(modules[2])
     noticia.append(modules[0])
+    noticia.append(f"#news #{tema}\n")
     noticia.append("\n--------------\n")
     if modules[1]:
         for subtitulo in modules[1]:
@@ -151,10 +151,11 @@ def noticiaOpinion(modules,titulo):
     return noticia
 
 # Noticia Video
-def noticiaVideo(modules,titulo):
+def noticiaVideo(modules,titulo,tema):
     noticia = []
     article = extractArticle(modules[3]) 
     noticia.append(modules[0])
+    noticia.append("#news #{tema}\n")
     noticia.append("\n---------------\n")
     if modules[1]:
         for subtitulo in modules[1]:
@@ -172,14 +173,15 @@ def noticiaVideo(modules,titulo):
 def noticia(url,titulo):
     html = httpGet(url)
     html = html.text
+    tema = url.split('/')[3] if len(url.split('/')) > 3 else None
     soup = crearSopa(html)
     modules = articleModules(soup)
     if len(modules) == 5:
-        noticia = noticiaNormal(modules,titulo)
+        noticia = noticiaNormal(modules,titulo,tema)
     elif len(modules) == 3:
-        noticia = noticiaOpinion(modules,titulo)
+        noticia = noticiaOpinion(modules,titulo,tema)
     elif len(modules) == 4:
-        noticia = noticiaVideo(modules,titulo)
+        noticia = noticiaVideo(modules,titulo,tema)
     return noticia
 
 def noticiasLinks(lavanguardia):
@@ -205,7 +207,7 @@ noticiaserror = []
 linkserror = []
 
 for i in range(len(noticias)):
-    if "emagister" in links[i] or "https://www.lavanguardia.comhttps://www.lavanguardia.com" in links[i]:
+    if "emagister" in links[i] or "https://www.lavanguardia.comhttps://www.lavanguardia.com" in links[i] or "Últimas noticias" in noticias[i] or not links[i] or "participacion" in links[i] or "motor" in links[i] or "television" in links[i] or "comprar" in links[i]:
         continue  # Skip this link
     try:
         noticia(links[i], noticias[i])
