@@ -1,21 +1,14 @@
 import requests
 import traceback
 from openai import OpenAI
-import sys
 from bs4 import BeautifulSoup
 from selenium import webdriver 
-import pandas as pd 
-from selenium.webdriver.common.by import By 
-from selenium.webdriver.support.ui import WebDriverWait 
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 
 
 # TODO
-# - Esta casi done, solo falta Front-End en Obsidian para la presentacion de notiias.
-# - AI: Poner que analize todas los titulares y escoja
+# - AI: Poner que analize todas los titulares y escoja (lo hago por el direcotrio del link, CUTRE pero de mmnt chuta )
 # - AI: Falta lo de procesar los textos por algun tipo de IA (creo que sera una mierda)
-
 
 # Arguments  
 youtube_url = "https://www.youtube.com/results?search_query=+"
