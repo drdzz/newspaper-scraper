@@ -3,13 +3,13 @@ import traceback
 from openai import OpenAI
 import sys
 from bs4 import BeautifulSoup
-import json
-import re
 from selenium import webdriver 
 import pandas as pd 
 from selenium.webdriver.common.by import By 
 from selenium.webdriver.support.ui import WebDriverWait 
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
+
 
 # TODO
 # - Esta casi done, solo falta Front-End en Obsidian para la presentacion de notiias.
@@ -49,7 +49,9 @@ def videoFinder(titular): # esta era la idea, estoy apunto de desecharla, aunque
         search_url = f'{youtube_url}{titular}lavanguardia'
         search_url = search_url.replace(' ','+')
         search_url = search_url.replace('%','')
-        driver = webdriver.Chrome() 
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')
+        driver = webdriver.Chrome(options=chrome_options)
         driver.get(search_url)
         user_data = driver.find_elements('xpath', '//*[@id="video-title"]')
         links = []
@@ -109,7 +111,7 @@ def extractArticle(article):
 # Escribe noticia
 def escribirNoticia(noticia,titulo):
     #with open('C:\\Users\\marc.ponce\\Documents\\Obsidian Vault\\noticia.md','w',encoding='utf-8') as file:     # For Windows
-    with open (f'/Users/marc.ponce/Documents/Obsidian Vault/News/{titulo}.md','w',encoding='utf-8') as file:      #  For MacOS
+    with open (f'/Users/marc.ponce/Documents/Obsidian Vault/noticias/{titulo}.md','w',encoding='utf-8') as file:      #  For MacOS
         for i in range(len(noticia)):
             if i>0:
                 file.write(noticia[i])
@@ -120,7 +122,6 @@ def noticiaNormal(modules,titulo,tema):
     noticia = []
     article = extractArticle(modules[4])
     noticia.append(modules[0])
-    noticia.append(f"#news #{tema}\n")
     noticia.append("\n---------------\n")
     if modules[1]:
         for subtitulo in modules[1]:
@@ -131,6 +132,7 @@ def noticiaNormal(modules,titulo,tema):
     noticia.append(modules[3]+"\n\n\n")
     for data in article:
         noticia.append(data)
+    noticia.append(f"#news #{tema}\n")
     escribirNoticia(noticia,titulo)
     return noticia 
 
@@ -139,7 +141,6 @@ def noticiaOpinion(modules,titulo,tema):
     noticia = []
     article = extractArticle(modules[2])
     noticia.append(modules[0])
-    noticia.append(f"#news #{tema}\n")
     noticia.append("\n--------------\n")
     if modules[1]:
         for subtitulo in modules[1]:
@@ -147,6 +148,7 @@ def noticiaOpinion(modules,titulo,tema):
             noticia.append("------------\n")
     for data in article:
         noticia.append(data)
+    noticia.append(f"#news #{tema}\n")
     escribirNoticia(noticia, titulo)
     return noticia
 
@@ -155,7 +157,6 @@ def noticiaVideo(modules,titulo,tema):
     noticia = []
     article = extractArticle(modules[3]) 
     noticia.append(modules[0])
-    noticia.append("#news #{tema}\n")
     noticia.append("\n---------------\n")
     if modules[1]:
         for subtitulo in modules[1]:
@@ -165,6 +166,7 @@ def noticiaVideo(modules,titulo,tema):
     noticia.append("\n\n\n")
     for data in article:
         noticia.append(data)
+    noticia.append("#news #{tema}\n")
     escribirNoticia(noticia,titulo)
     
     return noticia 
@@ -207,7 +209,7 @@ noticiaserror = []
 linkserror = []
 
 for i in range(len(noticias)):
-    if "emagister" in links[i] or "https://www.lavanguardia.comhttps://www.lavanguardia.com" in links[i] or "Últimas noticias" in noticias[i] or not links[i] or "participacion" in links[i] or "motor" in links[i] or "television" in links[i] or "comprar" in links[i]:
+    if "emagister" in links[i] or "https://www.lavanguardia.comhttps://www.lavanguardia.com" in links[i] or "Últimas noticias" in noticias[i] or not links[i] or "participacion" in links[i] or "motor" in links[i] or "television" in links[i] or "comprar" in links[i] or "comer" in links[i] or "gente" in links[i] or "magazine" in links[i]:
         continue  # Skip this link
     try:
         noticia(links[i], noticias[i])
