@@ -4,7 +4,7 @@ from openai import OpenAI
 from bs4 import BeautifulSoup
 from selenium import webdriver 
 from selenium.webdriver.chrome.options import Options
-
+import json
 
 # TODO
 # - AI: Poner que analize todas los titulares y escoja (lo hago por el direcotrio del link, CUTRE pero de mmnt chuta )
@@ -13,6 +13,7 @@ from selenium.webdriver.chrome.options import Options
 # Arguments  
 youtube_url = "https://www.youtube.com/results?search_query=+"
 lavanguardia = "https://www.lavanguardia.com"
+apikey = "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"
 #client = OpenAI(api_key='sk-')
 
 # GET Request
@@ -200,6 +201,19 @@ noticias = noticiasLinks(lavanguardia)[0]
 links = noticiasLinks(lavanguardia)[1]
 noticiaserror = []
 linkserror = []
+
+def requestIA(apikey):
+    response = requests.post(url="https://openrouter.ai/api/v1/chat/completions",
+        data=json.dumps({
+        "model": "openchat/openchat-7b", # Optional
+        "messages": [
+        {"role": "user", "content": "What is the meaning of life?"}
+        ]
+        })
+        )
+    return response
+
+#print(requestIA(apikey))
 
 for i in range(len(noticias)):
     if "emagister" in links[i] or "https://www.lavanguardia.comhttps://www.lavanguardia.com" in links[i] or "Últimas noticias" in noticias[i] or not links[i] or "participacion" in links[i] or "motor" in links[i] or "television" in links[i] or "comprar" in links[i] or "comer" in links[i] or "gente" in links[i] or "magazine" in links[i]:
