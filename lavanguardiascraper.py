@@ -1,58 +1,7 @@
-import requests
-import traceback
-from openai import OpenAI
-from bs4 import BeautifulSoup
-from selenium import webdriver 
-from selenium.webdriver.chrome.options import Options
-import json
-
-# TODO
-# - AI: Poner que analize todas los titulares y escoja (lo hago por el direcotrio del link, CUTRE pero de mmnt chuta )
-# - AI: Falta lo de procesar los textos por algun tipo de IA (creo que sera una mierda)
+import methods
 
 # Arguments  
-youtube_url = "https://www.youtube.com/results?search_query=+"
 lavanguardia = "https://www.lavanguardia.com"
-apikey = "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"
-#client = OpenAI(api_key='sk-')
-
-# GET Request
-def httpGet(url):
-    resp = requests.get(url)
-    html = resp
-    return html
-
-# BeautifulSoup object 
-def crearSopa(html):
-    soup = BeautifulSoup(html, 'html.parser')
-    return soup
-
-def gpt(): # Para nada esto funciona solo estaba tanteando textos sueltos y experimentando con prompts
-    response = client.chat.completions.create(
-    model="gpt-3.5-turbo-1106",
-    response_format={ "type": "json_object" },
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant designed to enumerate all factions/parties/entities from a text and decide if author of text shows any bias towards any of them, result shall be short."},
-        {"role": "user", "content": "La alianza entre el Partido Popular Europeo el grupo liberal y la ultraderecha ha convertido esta tarde el -semivacío- hemiciclo del Parlamento Europeo en Estrasburgo en un auténtico ring de boxeo entre los defensores y los detractores de la ley de amnistía que actualmente se tramita en el Congreso, una iniciativa que de acuerdo con el Gobierno, los socialistas y la izquierda europea es un asunto constitucional interno pero que los primeros presentan como el principio del fin no de España sino de Europa. En el centro de todas las miradas la Comisión Europea que hoy se ha puesto de perfil y ha evitado avanzar cualquier conclusión sobre el contenido de la ley."}
-    ] 
-    )
-    print(response.choices[0])
-
-# buscaod Youtube Video 
-def videoFinder(titular): # esta era la idea, estoy apunto de desecharla, aunque esta es la manera mas sencilla seguro
-        search_url = f'{youtube_url}{titular}lavanguardia'
-        search_url = search_url.replace(' ','+')
-        search_url = search_url.replace('%','')
-        chrome_options = Options()
-        chrome_options.add_argument('--headless')
-        driver = webdriver.Chrome(options=chrome_options)
-        driver.get(search_url)
-        user_data = driver.find_elements('xpath', '//*[@id="video-title"]')
-        links = []
-        for i in user_data:
-                    links.append(i.get_attribute('href'))
-        link = links[0]
-        return link            
 
 # This suplanta crear Textos /imagenes /videos por separado, separa cabecera y noticia en si 
 def articleModules(soup): 
@@ -68,7 +17,7 @@ def articleModules(soup):
     images_in_modules = set() if article is None else set(article.find_all('img', {'data-full-src': lambda x: x and 'lavanguardia' in x}))
     foto_portada = list(set(fotos).difference(images_in_modules))
     if video_tags:
-        link = videoFinder(titulo1)
+        link = methods.videoFinder(titulo1)
         link = f"![|100%]({link})"
         return titulo, subs, link, article
     if foto_portada:
@@ -102,15 +51,6 @@ def extractArticle(article):
             elements.append(extracted_elements[i])
     return elements
     
-# Escribe noticia
-def escribirNoticia(noticia,titulo):
-    #with open('C:\\Users\\marc.ponce\\Documents\\Obsidian Vault\\noticia.md','w',encoding='utf-8') as file:     # For Windows
-    with open (f'/Users/marc.ponce/Documents/Obsidian Vault/noticias/{titulo}.md','w',encoding='utf-8') as file:      #  For MacOS
-        for i in range(len(noticia)):
-            if i>0:
-                file.write(noticia[i])
-    return
-
 # Noticia Normal
 def noticiaNormal(modules,titulo,tema):
     noticia = []
@@ -119,7 +59,6 @@ def noticiaNormal(modules,titulo,tema):
     noticia.append("\n---------------\n")
     if modules[1]:
         for subtitulo in modules[1]:
-            #print(subtitulo)
             noticia.append(f"- **{subtitulo}**\n")
             noticia.append("---------------\n")    
     noticia.append(modules[2])
@@ -127,7 +66,7 @@ def noticiaNormal(modules,titulo,tema):
     for data in article:
         noticia.append(data)
     noticia.append(f"#news #{tema}\n")
-    escribirNoticia(noticia,titulo)
+    methods.escribirNoticia(noticia,titulo)
     return noticia 
 
 # Noticia Opinion
@@ -143,7 +82,7 @@ def noticiaOpinion(modules,titulo,tema):
     for data in article:
         noticia.append(data)
     noticia.append(f"#news #{tema}\n")
-    escribirNoticia(noticia, titulo)
+    methods.escribirNoticia(noticia, titulo)
     return noticia
 
 # Noticia Video
@@ -160,17 +99,20 @@ def noticiaVideo(modules,titulo,tema):
     noticia.append("\n\n\n")
     for data in article:
         noticia.append(data)
-    noticia.append("#news #{tema}\n")
-    escribirNoticia(noticia,titulo)
+    noticia.append(f"#news #{tema}\n")
+    methods.escribirNoticia(noticia,titulo)
     
     return noticia 
 
+
 # Noticia 
 def noticia(url,titulo):
-    html = httpGet(url)
+    html = methods.httpGet(url)
     html = html.text
-    tema = url.split('/')[3] if len(url.split('/')) > 3 else None
-    soup = crearSopa(html)
+    tema = methods.extractTema(url)
+    if tema is None:
+        print(url)
+    soup = methods.crearSopa(html)
     modules = articleModules(soup)
     if len(modules) == 5:
         noticia = noticiaNormal(modules,titulo,tema)
@@ -184,56 +126,45 @@ def noticiasLinks(lavanguardia):
     noticias = []
     titulares = []
     links = []
-    html = httpGet(lavanguardia)
+    html = methods.httpGet(lavanguardia)
     html = html.text
-    soup = crearSopa(html)
+    soup = methods.crearSopa(html)
     noticias = soup.find_all('a', itemprop='headline')
     for noticia in noticias:
-        if (noticia.text != 'Últimas noticias') or ('/vida/' in link):
-            link = f"{lavanguardia}{noticia.get('href')}"    
-            noticia = noticia.text
-            links.append(link)
-            titulares.append(noticia)
+        link = f"{lavanguardia}{noticia.get('href')}"    
+        noticia = noticia.text
+        links.append(link)
+        titulares.append(noticia)
     return titulares, links # eventualmente lo unico que me interesarán seran los links
 
+def run():
+    
+    noticias = noticiasLinks(lavanguardia)[0]
+    links = noticiasLinks(lavanguardia)[1]
+    noticiaserror = []
+    linkserror = []
 
-noticias = noticiasLinks(lavanguardia)[0]
-links = noticiasLinks(lavanguardia)[1]
-noticiaserror = []
-linkserror = []
 
-def requestIA(apikey):
-    response = requests.post(url="https://openrouter.ai/api/v1/chat/completions",
-        data=json.dumps({
-        "model": "openchat/openchat-7b", # Optional
-        "messages": [
-        {"role": "user", "content": "What is the meaning of life?"}
-        ]
-        })
-        )
-    return response
+    for i in range(len(noticias)):
+        if "emagister" in links[i] or "https://www.lavanguardia.comhttps://www.lavanguardia.com" in links[i] or "Últimas noticias" in noticias[i] or not links[i] or "participacion" in links[i] or "motor" in links[i] or "television" in links[i] or "comprar" in links[i] or "comer" in links[i] or "gente" in links[i] or "magazine" in links[i] or "/vida/" in links[i]:
+            continue  # Skip this link
+        try:
+            noticia(links[i], noticias[i])
+        except Exception as exc: 
+            #print(exc)
+            noticiaserror.append(noticias[i])
+            linkserror.append(links[i])
+            print("algo ocurrio para:")
+            print(noticias[i])
+            #traceback.print_exc()
 
-#print(requestIA(apikey))
+    print("Ahora Errores:")
 
-for i in range(len(noticias)):
-    if "emagister" in links[i] or "https://www.lavanguardia.comhttps://www.lavanguardia.com" in links[i] or "Últimas noticias" in noticias[i] or not links[i] or "participacion" in links[i] or "motor" in links[i] or "television" in links[i] or "comprar" in links[i] or "comer" in links[i] or "gente" in links[i] or "magazine" in links[i]:
-        continue  # Skip this link
-    try:
-        noticia(links[i], noticias[i])
-    except Exception as exc: 
-        #print(exc)
-        noticiaserror.append(noticias[i])
-        linkserror.append(links[i])
-        print("algo ocurrio para:")
-        print(noticias[i])
-        #traceback.print_exc()
-
-print("Ahora Errores:")
-
-for i in range(len(noticiaserror)):
-    try:
-        noticia(linkserror[i], noticiaserror[i])
-    except Exception as exc: 
-        print(exc)
-        print("Otra vez para para:")
-        print(linkserror[i])
+    for i in range(len(noticiaserror)):
+        try:
+            noticia(linkserror[i], noticiaserror[i])
+        except Exception as exc: 
+            print(exc)
+            print("Otra vez para para:")
+            print(linkserror[i])
+    return
