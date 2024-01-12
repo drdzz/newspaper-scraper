@@ -1,4 +1,5 @@
 import methods
+import traceback
 
 # Arguments  
 lavanguardia = "https://www.lavanguardia.com"
@@ -123,6 +124,7 @@ def noticia(url,titulo):
     return noticia
 
 def noticiasLinks(lavanguardia):
+
     noticias = []
     titulares = []
     links = []
@@ -139,11 +141,10 @@ def noticiasLinks(lavanguardia):
 
 def run():
     
-    noticias = noticiasLinks(lavanguardia)[0]
-    links = noticiasLinks(lavanguardia)[1]
+    #noticias, links = noticiasLinks(lavanguardia)
+    links, noticias = methods.getLinks(lavanguardia)
     noticiaserror = []
     linkserror = []
-
 
     for i in range(len(noticias)):
         if "emagister" in links[i] or "https://www.lavanguardia.comhttps://www.lavanguardia.com" in links[i] or "Últimas noticias" in noticias[i] or not links[i] or "participacion" in links[i] or "motor" in links[i] or "television" in links[i] or "comprar" in links[i] or "comer" in links[i] or "gente" in links[i] or "magazine" in links[i] or "/vida/" in links[i]:
@@ -164,7 +165,8 @@ def run():
         try:
             noticia(linkserror[i], noticiaserror[i])
         except Exception as exc: 
-            print(exc)
+            #print(exc)
             print("Otra vez para para:")
             print(linkserror[i])
     return
+

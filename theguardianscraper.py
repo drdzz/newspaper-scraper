@@ -2,13 +2,6 @@ import tomarkdown
 import methods
 
 
-def newsPapers(diario):
-    soups = []
-    html = methods.httpGet(diario).text
-    soup = methods.crearSopa(html)
-    soups.append(soup)
-    
-    return soups
 
 def html_to_markdown(html_code): ## Kinda works pero no es el comportamiento que espero
     markdown_text = tomarkdown.rewriteToMd(html_code)
@@ -42,44 +35,6 @@ def headers(new):
 
     return md_headers
 
-def linksGuardian(soup):
-    links = []
-    headlines = []
-    tags = soup.find_all('div', class_="dcr-omk9hw")
-    for tag in tags:
-        tag = tag.find('a')
-        headline = tag.get('aria-label')
-        href = tag.get('href')
-        link = 'https://theguardian.com' + href
-        links.append(link)
-        headlines.append(headline)
-    return  links, headlines # eventualmente lo unico que me interesarán seran los links
-
-def linksPeriodico(soup):
-    links = []
-    headlines = []
-    tags = soup.find_all('h2', class_="title")
-    for tag in tags:
-        tag = tag.find('a')
-        if tag:
-            href = tag.get('href')
-            headline = tag.get('title')
-            links.append(href)
-            headlines.append(headline)
-
-    return  links, headlines
-
-def linksVanguardia(soup):
-    headlines = []
-    links = []
-    vang = "https://www.lavanguardia.com"
-    noticias = soup.find_all('a', itemprop='headline')
-    for noticia in noticias:
-        link = f"{vang}{noticia.get('href')}"    
-        headline = noticia.text
-        links.append(link)
-        headlines.append(headline)
-    return links, headlines
 
 def articleExtractor(link):
     tags_to_find = ['h2', 'h3', 'img', 'video', 'p']
@@ -93,7 +48,6 @@ def articleExtractor(link):
         # Find tags sequentially in the order they appear in the content
         for tag in article.find_all(tags_to_find):
             if tag.name in tags_to_find:  # Check if the found tag matches the desired tags
-                #print(tag)
                 found_tags.append(tag)
     if not found_tags:
         print(link)
@@ -105,13 +59,6 @@ def gafcodgadidigu(link):
     soup = methods.crearSopa(html)
     return
 
-# To find all news from a list of newspapers
-def getLinks(diario):
-    sopas = newsPapers(diario)
-    linkAndHeadlines = linksGuardian(sopas[0])
-    links = linkAndHeadlines[0]
-    headlines = linkAndHeadlines[0] # Reserve this for easier categorization, probably not needed since headline inside news anyway
-    return links, headlines
 
 def createNewMd(headers, body, tema):
     new = []
@@ -149,7 +96,7 @@ def toWrite(md_list):
     return
 
 def run():
-    links = getLinks('https://www.theguardian.com/')
+    links = methods.getLinks('https://www.theguardian.com/')
     news = getTags(links[0][:])  # remember getLins() returns headlines aswell (this was optional for future tagging)
     mds = loopThroughNews(news)
     toWrite(mds)
