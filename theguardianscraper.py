@@ -1,6 +1,6 @@
 import tomarkdown
 import methods
-
+import time
 
 
 def html_to_markdown(html_code): ## Kinda works pero no es el comportamiento que espero
@@ -63,6 +63,7 @@ def gafcodgadidigu(link):
 def createNewMd(headers, body, tema):
     new = []
     for header in headers:
+        #print(header)
         new.append(header)
     for paragraph in body:
         new.append(paragraph)
@@ -91,13 +92,13 @@ def toWrite(md_list):
     for md in md_list:
         titulo = md[0]
         body = md[1:]
-        methods.escribirNoticia(body, titulo[2:])
+        methods.escribirNoticia(body, titulo[0:])
     
     return
 
 def run():
     links = methods.getLinks('https://www.theguardian.com/')
-    news = getTags(links[0][:])  # remember getLins() returns headlines aswell (this was optional for future tagging)
+    news = getTags(links[0][:2])  # remember getLins() returns headlines aswell (this was optional for future tagging)
     mds = loopThroughNews(news)
     toWrite(mds)
     return

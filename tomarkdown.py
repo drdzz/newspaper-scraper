@@ -24,7 +24,7 @@ def rewriteToMd(soup):
             link = tag.get('src')
             subpic = tag.get('alt')
             if link:
-                noticia.append(f"![]({link})"+"{width=100%}\n")
+                noticia.append(f"![]({link})\n")
                 noticia.append(f"*{subpic}*\n\n")
 
     return noticia
