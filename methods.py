@@ -57,7 +57,7 @@ def videoFinder(titular): # esta era la idea, estoy apunto de desecharla, aunque
 # Escribe noticia
 def escribirNoticia(noticia,titulo):
     #with open('C:\\Users\\marc.ponce\\Documents\\Obsidian Vault\\noticia.md','w',encoding='utf-8') as file:     # For Windows
-    with open (f'/Users/marc.ponce/Documents/Obsidian Vault/noticias/{titulo[2:]}.md','w',encoding='utf-8') as file:      #  For MacOS
+    with open (f'/Users/marc.ponce/Documents/Obsidian Vault/noticias/{titulo}.md','w',encoding='utf-8') as file:      #  For MacOS
         for i in range(len(noticia)):
             if i>=0:
                 file.write(noticia[i])

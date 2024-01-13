@@ -98,7 +98,7 @@ def toWrite(md_list):
 
 def run():
     links = methods.getLinks('https://www.theguardian.com/')
-    news = getTags(links[0][:2])  # remember getLins() returns headlines aswell (this was optional for future tagging)
+    news = getTags(links[0][:])  # remember getLins() returns headlines aswell (this was optional for future tagging)
     mds = loopThroughNews(news)
     toWrite(mds)
     return

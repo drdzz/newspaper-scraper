@@ -101,6 +101,7 @@ def noticiaVideo(modules,titulo,tema):
     for data in article:
         noticia.append(data)
     noticia.append(f"#news #{tema}\n")
+    print("titulooo",titulo)
     methods.escribirNoticia(noticia,titulo)
     
     return noticia 
