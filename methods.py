@@ -59,8 +59,7 @@ def escribirNoticia(noticia,titulo):
     #with open('C:\\Users\\marc.ponce\\Documents\\Obsidian Vault\\noticia.md','w',encoding='utf-8') as file:     # For Windows
     with open (f'/Users/marc.ponce/Documents/Obsidian Vault/noticias/{titulo}.md','w',encoding='utf-8') as file:      #  For MacOS
         for i in range(len(noticia)):
-            if i>=0:
-                file.write(noticia[i])
+            file.write(noticia[i])
     return
 
 def linksGuardian(soup):

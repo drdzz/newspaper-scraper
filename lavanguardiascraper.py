@@ -56,7 +56,6 @@ def extractArticle(article):
 def noticiaNormal(modules,titulo,tema):
     noticia = []
     article = extractArticle(modules[4])
-    noticia.append(modules[0])
     noticia.append("\n---------------\n")
     if modules[1]:
         for subtitulo in modules[1]:
@@ -101,7 +100,6 @@ def noticiaVideo(modules,titulo,tema):
     for data in article:
         noticia.append(data)
     noticia.append(f"#news #{tema}\n")
-    print("titulooo",titulo)
     methods.escribirNoticia(noticia,titulo)
     
     return noticia 
@@ -112,8 +110,6 @@ def noticia(url,titulo):
     html = methods.httpGet(url)
     html = html.text
     tema = methods.extractTema(url)
-    if tema is None:
-        print(url)
     soup = methods.crearSopa(html)
     modules = articleModules(soup)
     if len(modules) == 5:
@@ -123,22 +119,6 @@ def noticia(url,titulo):
     elif len(modules) == 4:
         noticia = noticiaVideo(modules,titulo,tema)
     return noticia
-
-def noticiasLinks(lavanguardia):
-
-    noticias = []
-    titulares = []
-    links = []
-    html = methods.httpGet(lavanguardia)
-    html = html.text
-    soup = methods.crearSopa(html)
-    noticias = soup.find_all('a', itemprop='headline')
-    for noticia in noticias:
-        link = f"{lavanguardia}{noticia.get('href')}"    
-        noticia = noticia.text
-        links.append(link)
-        titulares.append(noticia)
-    return titulares, links # eventualmente lo unico que me interesarán seran los links
 
 def run():
     

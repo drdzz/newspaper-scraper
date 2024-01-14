@@ -37,7 +37,7 @@ def headers(new):
 
 
 def articleExtractor(link):
-    tags_to_find = ['h2', 'h3', 'img', 'video', 'p']
+    tags_to_find = ['h2', 'h3', 'img', 'video', 'p', 'blockquote']
     found_tags = []
     html = methods.httpGet(link)
     soup = methods.crearSopa(html.text)
