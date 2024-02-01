@@ -13,26 +13,26 @@ def getTags(links):
     tags = []
     temas = []
     for link in links:
-        new = []
-        a = articleExtractor(link)
-        header = a[0]
-        article = a[1]
-        tema = a[2]
-        temas.append(tema)
-        new.append(header)
-        new.append(article)
-        tags.append(new)
+        if "/global-development/" in link or "/world/" in link or "/international/" in link:
+            
+            new = []
+            a = articleExtractor(link)
+            header = a[0]
+            article = a[1]
+            tema = a[2]
+            temas.append(tema)
+            new.append(header)
+            new.append(article)
+            tags.append(new)
     return tags, temas
 
 # To markdown
 def tag2md(tags):
     md = tomarkdown.tag2md(tags)
-    
     return md
 
 def headers(new):
     md_headers = tomarkdown.rewriteToMd(new)
-
     return md_headers
 
 
@@ -63,7 +63,6 @@ def gafcodgadidigu(link):
 def createNewMd(headers, body, tema):
     new = []
     for header in headers:
-        #print(header)
         new.append(header)
     for paragraph in body:
         new.append(paragraph)

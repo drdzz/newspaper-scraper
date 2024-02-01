@@ -12,7 +12,6 @@ def rewriteToMd(soup):
     if subti:
         subs1 = subti.find_all('p')
         subs = []
-        #noticia.append("-----------\n")
         for sub in subs1:
             subs.append(f"- **{sub.text}**")
         noticia.append("-----------\n")

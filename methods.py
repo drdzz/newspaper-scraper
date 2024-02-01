@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 from selenium import webdriver 
 from selenium.webdriver.chrome.options import Options
+import os
 
 # GET Request
 def httpGet(url):
@@ -54,13 +55,25 @@ def videoFinder(titular): # esta era la idea, estoy apunto de desecharla, aunque
         return link            
 
 
-# Escribe noticia
-def escribirNoticia(noticia,titulo):
-    #with open('C:\\Users\\marc.ponce\\Documents\\Obsidian Vault\\noticia.md','w',encoding='utf-8') as file:     # For Windows
-    with open (f'/Users/marc.ponce/Documents/Obsidian Vault/noticias/{titulo}.md','w',encoding='utf-8') as file:      #  For MacOS
-        for i in range(len(noticia)):
-            file.write(noticia[i])
-    return
+
+def escribirNoticia(noticia, titulo):
+    directory = "/Users/marc.ponce/Documents/Obsidian Vault/noticias/"
+    os.makedirs(directory, exist_ok=True)
+
+    # Sanitize the title by replacing "/" with another character (e.g., "_")
+    sanitized_titulo = titulo.replace("/", "_")
+
+    file_path = os.path.join(directory, f"{sanitized_titulo}.md")
+
+    try:
+        with open(file_path, 'w', encoding='utf-8') as file:
+            for line in noticia:
+                file.write(line)
+    except FileNotFoundError:
+        print(f"Error: The directory '{directory}' does not exist.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
 
 def linksGuardian(soup):
     links = []

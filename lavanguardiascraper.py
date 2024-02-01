@@ -89,7 +89,6 @@ def noticiaOpinion(modules,titulo,tema):
 def noticiaVideo(modules,titulo,tema):
     noticia = []
     article = extractArticle(modules[3]) 
-    noticia.append(modules[0])
     noticia.append("\n---------------\n")
     if modules[1]:
         for subtitulo in modules[1]:
