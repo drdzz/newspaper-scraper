@@ -6,6 +6,9 @@
 This script was done to learn Python and scraping, don't take it too seriously.
 I just had a simple idea that I let grow ending up like this.
 
+The guardian and ElPeriodico dont work anymore i guess, they change the tags 
+from time to time, I put more effort into LaVanguardia.
+
 ## Description
 --------------
 This script will take all links of news in lavanguardia, el periodico and the 
